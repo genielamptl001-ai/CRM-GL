@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Vercel automatically injects your Environment Variables here
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
@@ -9,14 +8,14 @@ const supabase = createClient(
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
   try {
-    // GET: Fetch all leads
+    // GET: Fetch all leads (Public or secure depending on preference)
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('crm_leads')
@@ -27,8 +26,14 @@ export default async function handler(req, res) {
       return res.status(200).json(data);
     }
 
-    // POST: Add new lead
+    // POST: Add new lead (Enforce API Key Check)
     if (req.method === 'POST') {
+      const clientApiKey = req.headers['x-api-key'];
+
+      if (!clientApiKey || clientApiKey !== process.env.CRM_API_KEY) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid or missing API Key' });
+      }
+
       const { data, error } = await supabase
         .from('crm_leads')
         .insert([req.body])
