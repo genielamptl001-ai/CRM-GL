@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GLamp Enterprise CRM</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -12,13 +13,23 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
+    <script>
+        // --- CONFIGURE YOUR SUPABASE CREDENTIALS HERE ---
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL'; 
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        // ------------------------------------------------
+        
+        let supabaseClient = null;
+        if (window.supabase && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+    </script>
 </head>
 <body class="bg-gray-100 h-screen overflow-hidden flex font-sans">
 
-    <!-- 1. PRIMARY DARK NAV BAR (GLamp Sidebar) -->
+    <!-- 1. PRIMARY DARK NAV BAR -->
     <aside class="w-64 bg-[#0B1E3B] text-gray-300 flex flex-col justify-between select-none shrink-0 border-r border-blue-950 z-20">
         <div>
-            <!-- Branding Header -->
             <div class="h-16 flex items-center px-6 border-b border-blue-900/40 bg-[#07152B] gap-3">
                 <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
                     💡
@@ -29,7 +40,6 @@
                 </div>
             </div>
 
-            <!-- Primary Navigation Links -->
             <div class="p-3">
                 <p class="px-3 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Core Modules</p>
                 <nav class="space-y-1 text-sm">
@@ -61,7 +71,6 @@
             </div>
         </div>
 
-        <!-- User Profile Footer -->
         <div class="p-4 border-t border-blue-900/40 bg-[#07152B] flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
                 AM
@@ -75,8 +84,6 @@
 
     <!-- 2. MAIN WORKSPACE CONTAINER -->
     <main class="flex-1 flex flex-col h-screen bg-[#F0F2F5] overflow-hidden">
-
-        <!-- Top Header Bar -->
         <header class="h-16 bg-white border-b border-gray-200 px-6 flex justify-between items-center shrink-0 z-10 shadow-sm">
             <div class="flex items-center gap-4 flex-1 max-w-md">
                 <div class="relative w-full">
@@ -94,18 +101,14 @@
             </div>
         </header>
 
-        <!-- Dynamic Module Content Views -->
         <div class="flex-1 overflow-hidden relative">
-
             <!-- MODULE 1: CANDIDATES -->
             <section id="view-candidates" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar">
                 <div class="max-w-7xl mx-auto space-y-6">
-                    
-                    <!-- Candidates Header with ADD CANDIDATE BUTTON -->
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <h2 class="text-xl font-bold text-gray-800">Candidates Talent Pool</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Recruitment stages, applicant evaluation, and live Supabase database records</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Recruitment stages and direct client-side Supabase records</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="flex bg-gray-100 p-1 rounded-lg text-xs font-medium text-gray-600">
@@ -114,22 +117,18 @@
                                 <button onclick="filterCandidates('Interview')" id="filter-Interview" class="px-3 py-1.5 rounded-md hover:text-gray-900">Interview</button>
                                 <button onclick="filterCandidates('Hired')" id="filter-Hired" class="px-3 py-1.5 rounded-md hover:text-gray-900">Hired</button>
                             </div>
-                            
-                            <!-- ADD CANDIDATE BUTTON -->
                             <button onclick="openCandidateModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
                                 <span>+</span> Add Candidate
                             </button>
                         </div>
                     </div>
-
-                    <!-- Candidates Grid -->
                     <div id="candidatesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="col-span-full text-center py-8 text-gray-400 text-xs">Loading candidates from Supabase...</div>
+                        <div class="col-span-full text-center py-8 text-gray-400 text-xs">Loading candidates...</div>
                     </div>
                 </div>
             </section>
 
-            <!-- MODULE 2: MESSENGER / CHATS -->
+            <!-- MODULE 2: MESSENGER -->
             <section id="view-messages" class="absolute inset-0 flex overflow-hidden hidden">
                 <div class="w-80 bg-white border-r border-gray-200 flex flex-col shrink-0">
                     <div class="p-3 border-b border-gray-100">
@@ -145,25 +144,20 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="flex-1 flex flex-col bg-[#F7F9FB]">
                     <div class="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center shadow-sm">
-                        <div>
-                            <h3 class="font-bold text-gray-800 text-sm">General Discussion</h3>
-                            <p class="text-[11px] text-gray-500">Workspace team chat</p>
-                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm">General Discussion</h3>
                     </div>
                     <div class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-4">
                         <div class="bg-white p-3.5 rounded-xl shadow-sm max-w-lg border border-gray-200/80">
                             <p class="text-xs font-semibold text-blue-600 mb-1">System Notification</p>
                             <p class="text-xs text-gray-700">Welcome to GLamp Enterprise CRM workspace!</p>
-                            <span class="text-[10px] text-gray-400 block text-right mt-1">4:32 PM</span>
                         </div>
                     </div>
                     <div class="p-4 bg-white border-t border-gray-200">
                         <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
                             <input type="text" placeholder="Type a message..." class="flex-1 bg-transparent text-xs focus:outline-none text-gray-700">
-                            <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition">Send</button>
+                            <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Send</button>
                         </div>
                     </div>
                 </div>
@@ -173,37 +167,31 @@
             <section id="view-leads" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden">
                 <div class="max-w-7xl mx-auto space-y-6">
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200/80">
-                        <div class="flex justify-between items-center mb-4">
-                            <div>
-                                <h3 class="text-base font-bold text-gray-800">Add New Lead</h3>
-                                <p class="text-xs text-gray-500">Persists directly to Supabase crm_leads table</p>
-                            </div>
-                        </div>
+                        <h3 class="text-base font-bold text-gray-800 mb-3">Add New Lead</h3>
                         <form id="leadForm" onsubmit="handleLeadSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1">Lead Name</label>
-                                <input type="text" id="lead-name" required placeholder="John Doe" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-blue-500">
+                                <input type="text" id="lead-name" required placeholder="John Doe" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1">Email</label>
-                                <input type="email" id="lead-email" placeholder="john@example.com" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-blue-500">
+                                <input type="email" id="lead-email" placeholder="john@example.com" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1">Phone</label>
-                                <input type="text" id="lead-phone" placeholder="+123456789" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-blue-500">
+                                <input type="text" id="lead-phone" placeholder="+123456789" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1">Value (₹)</label>
-                                <input type="number" id="lead-value" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-blue-500">
+                                <input type="number" id="lead-value" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
                             </div>
-                            <button type="submit" class="bg-blue-600 text-white font-medium py-1.5 px-4 rounded-lg hover:bg-blue-700 text-xs h-[32px] transition">Save Lead</button>
+                            <button type="submit" class="bg-blue-600 text-white font-medium py-1.5 px-4 rounded-lg hover:bg-blue-700 text-xs h-[32px]">Save Lead</button>
                         </form>
                     </div>
-
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200/80 overflow-x-auto">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-base font-bold text-gray-800">Leads Database</h3>
-                            <button onclick="fetchLeads()" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg font-medium text-gray-700 transition">🔄 Refresh</button>
+                            <button onclick="fetchLeads()" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg font-medium text-gray-700">🔄 Refresh</button>
                         </div>
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -227,21 +215,6 @@
             <section id="view-deals" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden">
                 <div class="max-w-7xl mx-auto space-y-4">
                     <h2 class="text-xl font-bold text-gray-800">Deals Pipeline</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200/80">
-                            <h3 class="font-semibold text-gray-800 text-xs mb-3 pb-2 border-b">Qualified</h3>
-                            <div class="p-3 bg-gray-50 rounded-lg border text-xs space-y-1">
-                                <p class="font-semibold text-gray-900">Enterprise CRM Expansion</p>
-                                <p class="text-[10px] text-gray-500">Value: ₹2,50,000</p>
-                            </div>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200/80">
-                            <h3 class="font-semibold text-gray-800 text-xs mb-3 pb-2 border-b">Proposal Sent</h3>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200/80">
-                            <h3 class="font-semibold text-gray-800 text-xs mb-3 pb-2 border-b">Closed Won</h3>
-                        </div>
-                    </div>
                 </div>
             </section>
 
@@ -249,28 +222,17 @@
             <section id="view-customers" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200/80 p-6 max-w-7xl mx-auto">
                     <h2 class="text-xl font-bold text-gray-800 mb-2">Customers Directory</h2>
-                    <p class="text-xs text-gray-500">Active client accounts converted from closed won deals.</p>
                 </div>
             </section>
 
-            <!-- MODULE 6: ATTENDANCE LOG -->
+            <!-- MODULE 6: ATTENDANCE -->
             <section id="view-attendance" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden space-y-6">
                 <div class="max-w-7xl mx-auto space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h2 class="text-xl font-bold text-gray-800">Attendance Tracker</h2>
-                            <p class="text-xs text-gray-500 mt-1">Logs stored directly in Supabase attendance table</p>
-                        </div>
-                        <button onclick="recordAttendance('Checked In')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-xs font-semibold transition shadow-sm">
-                            ⏱ Check In Now
-                        </button>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200/80 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-800">Attendance Tracker</h2>
+                        <button onclick="recordAttendance('Checked In')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-xs font-semibold shadow-sm">⏱ Check In Now</button>
                     </div>
-
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200/80 overflow-x-auto">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-sm font-bold text-gray-800">Today's Activity Log</h3>
-                            <button onclick="fetchAttendance()" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg font-medium text-gray-700">🔄 Refresh</button>
-                        </div>
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="border-b text-[11px] text-gray-400 font-semibold uppercase tracking-wider">
@@ -286,11 +248,10 @@
                     </div>
                 </div>
             </section>
-
         </div>
     </main>
 
-    <!-- 3. ADD CANDIDATE MODAL -->
+    <!-- ADD CANDIDATE MODAL -->
     <div id="candidateModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white rounded-xl shadow-xl border border-gray-200 max-w-md w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -300,27 +261,27 @@
             <form id="candidateForm" onsubmit="handleCandidateSubmit(event)" class="space-y-3">
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Full Name</label>
-                    <input type="text" id="cand-name" required placeholder="e.g. Jordan Rivera" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" id="cand-name" required placeholder="e.g. Jordan Rivera" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Email</label>
-                    <input type="email" id="cand-email" placeholder="jordan@example.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="email" id="cand-email" placeholder="jordan@example.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Phone</label>
-                    <input type="text" id="cand-phone" placeholder="+1 234 567 890" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" id="cand-phone" placeholder="+1 234 567 890" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Role / Position</label>
-                    <input type="text" id="cand-role" required placeholder="e.g. Lead Product Designer" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" id="cand-role" required placeholder="e.g. Lead Product Designer" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Experience</label>
-                    <input type="text" id="cand-exp" placeholder="e.g. 5 Years Exp" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" id="cand-exp" placeholder="e.g. 5 Years Exp" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Stage</label>
-                    <select id="cand-stage" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                    <select id="cand-stage" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white outline-none">
                         <option value="Screening">Screening</option>
                         <option value="Interview">Interview</option>
                         <option value="Hired">Hired</option>
@@ -334,17 +295,14 @@
         </div>
     </div>
 
-    <!-- JavaScript Data and Navigation Handlers -->
     <script>
         let candidatesList = [];
         let activeFilter = 'All';
 
-        // Realtime Header Clock
         setInterval(() => {
             document.getElementById('header-clock').innerText = new Date().toLocaleTimeString();
         }, 1000);
 
-        // Core Module Navigation Switcher
         function switchTab(tabId) {
             const tabs = ['candidates', 'messages', 'leads', 'deals', 'customers', 'attendance'];
             tabs.forEach(t => {
@@ -355,26 +313,12 @@
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
             document.getElementById(`btn-${tabId}`).className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-sm font-medium transition";
 
-            const titles = {
-                candidates: 'Candidates',
-                messages: 'Messenger / Chats',
-                leads: 'Leads Pipeline',
-                deals: 'Deals Management',
-                customers: 'Customers Directory',
-                attendance: 'Attendance Log'
-            };
-            document.getElementById('current-module-title').innerText = titles[tabId];
-
             if (tabId === 'leads') fetchLeads();
             if (tabId === 'attendance') fetchAttendance();
             if (tabId === 'candidates') fetchCandidates();
         }
 
-        // Candidates UI Modal Handlers
-        function openCandidateModal() {
-            document.getElementById('candidateModal').classList.remove('hidden');
-        }
-
+        function openCandidateModal() { document.getElementById('candidateModal').classList.remove('hidden'); }
         function closeCandidateModal() {
             document.getElementById('candidateModal').classList.add('hidden');
             document.getElementById('candidateForm').reset();
@@ -384,78 +328,59 @@
             activeFilter = filter;
             ['All', 'Screening', 'Interview', 'Hired'].forEach(f => {
                 const btn = document.getElementById(`filter-${f}`);
-                if (btn) {
-                    btn.className = f === filter 
-                        ? 'px-3 py-1.5 rounded-md bg-white text-gray-900 shadow-sm font-semibold' 
-                        : 'px-3 py-1.5 rounded-md hover:text-gray-900 text-gray-600';
-                }
+                if (btn) btn.className = f === filter ? 'px-3 py-1.5 rounded-md bg-white text-gray-900 shadow-sm font-semibold' : 'px-3 py-1.5 rounded-md text-gray-600';
             });
             renderCandidates();
         }
 
         function renderCandidates() {
             const grid = document.getElementById('candidatesGrid');
-            const filtered = activeFilter === 'All' 
-                ? candidatesList 
-                : candidatesList.filter(c => c.stage === activeFilter);
+            const filtered = activeFilter === 'All' ? candidatesList : candidatesList.filter(c => c.stage === activeFilter);
 
             if (!filtered || filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full bg-white p-8 rounded-xl border border-gray-200/80 text-center text-gray-400 text-xs">No candidates found under '${activeFilter}' stage.</div>`;
+                grid.innerHTML = `<div class="col-span-full bg-white p-8 rounded-xl border text-center text-gray-400 text-xs">No candidates found under '${activeFilter}' stage.</div>`;
                 return;
             }
 
-            const stageColors = {
-                Screening: 'bg-purple-50 text-purple-600 border-purple-200',
-                Interview: 'bg-purple-100 text-purple-700 border-purple-300',
-                Hired: 'bg-emerald-50 text-emerald-600 border-emerald-200'
-            };
+            const stageColors = { Screening: 'bg-purple-50 text-purple-600 border-purple-200', Interview: 'bg-purple-100 text-purple-700 border-purple-300', Hired: 'bg-emerald-50 text-emerald-600 border-emerald-200' };
 
             grid.innerHTML = filtered.map(c => `
-                <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-3 hover:shadow-md transition">
+                <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-3">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h4 class="font-bold text-gray-900 text-sm">${c.name || 'Unnamed'}</h4>
-                            <p class="text-xs text-blue-600 font-medium mt-0.5">${c.position || c.role || 'Position Unspecified'}</p>
+                            <h4 class="font-bold text-gray-900 text-sm">${c.name}</h4>
+                            <p class="text-xs text-blue-600 font-medium mt-0.5">${c.position || c.role || 'Software Engineer'}</p>
                             ${c.email ? `<p class="text-[11px] text-gray-400 mt-0.5">${c.email}</p>` : ''}
                         </div>
-                        <span class="text-[10px] font-semibold px-2.5 py-1 rounded-md border ${stageColors[c.stage] || 'bg-gray-100 text-gray-600'}">${c.stage || 'Screening'}</span>
+                        <span class="text-[10px] font-semibold px-2.5 py-1 rounded-md border ${stageColors[c.stage] || 'bg-gray-100'}">${c.stage}</span>
                     </div>
                     <div class="flex justify-between items-center text-xs text-gray-500 pt-2 border-t border-gray-100">
-                        <span>💼 ${c.experience || '0 Years Exp'}</span>
-                        <button onclick="advanceCandidateStage('${c.id}')" class="text-xs text-blue-600 hover:text-blue-800 font-semibold">Advance Stage →</button>
+                        <span>💼 ${c.experience || '0 Years'}</span>
                     </div>
                 </div>
             `).join('');
         }
 
-        function advanceCandidateStage(id) {
-            const candidate = candidatesList.find(c => c.id == id);
-            if (!candidate) return;
-            if (candidate.stage === 'Screening') candidate.stage = 'Interview';
-            else if (candidate.stage === 'Interview') candidate.stage = 'Hired';
-            renderCandidates();
-        }
-
-        // Fetch candidates directly from Supabase via API
+        // Direct Client-Side Supabase Calls
         async function fetchCandidates() {
+            if (!supabaseClient) return;
             try {
-                const response = await fetch('/api/candidates');
-                if (response.ok) {
-                    const data = await response.json();
-                    candidatesList = data.map(item => ({
-                        ...item,
-                        role: item.position || item.role || 'Software Engineer'
-                    }));
-                }
-            } catch (e) {
-                console.error('Failed to load candidates:', e);
+                const { data, error } = await supabaseClient.from('candidates').select('*').order('id', { ascending: false });
+                if (error) throw error;
+                candidatesList = data || [];
+            } catch (err) {
+                console.error('Error fetching candidates:', err.message);
             }
             renderCandidates();
         }
 
-        // Save new candidate directly to Supabase via API
         async function handleCandidateSubmit(event) {
             event.preventDefault();
+            if (!supabaseClient) {
+                alert('Supabase credentials are not configured in the script header.');
+                return;
+            }
+
             const submitBtn = document.getElementById('cand-submit-btn');
             submitBtn.innerText = 'Saving...';
             submitBtn.disabled = true;
@@ -465,64 +390,41 @@
                 email: document.getElementById('cand-email').value,
                 phone: document.getElementById('cand-phone').value,
                 position: document.getElementById('cand-role').value,
-                role: document.getElementById('cand-role').value,
-                experience: document.getElementById('cand-exp').value || '0 Years Exp',
+                experience: document.getElementById('cand-exp').value || '0 Years',
                 stage: document.getElementById('cand-stage').value
             };
 
             try {
-                const response = await fetch('/api/candidates', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newCand)
-                });
+                const { data, error } = await supabaseClient.from('candidates').insert([newCand]).select();
+                if (error) throw error;
 
-                if (response.ok) {
-                    const saved = await response.json();
-                    candidatesList.unshift(saved);
-                    closeCandidateModal();
-                    renderCandidates();
-                } else {
-                    const errData = await response.json();
-                    alert('Failed to save candidate: ' + (errData.error || response.statusText));
+                if (data && data[0]) {
+                    candidatesList.unshift(data[0]);
                 }
+                closeCandidateModal();
+                renderCandidates();
             } catch (err) {
-                alert('Network error: ' + err.message);
+                alert('Failed to save candidate: ' + err.message);
             } finally {
                 submitBtn.innerText = 'Save Candidate';
                 submitBtn.disabled = false;
             }
         }
 
-        // Leads Handlers
         async function fetchLeads() {
-            try {
-                const response = await fetch('/api/leads');
-                const leads = await response.json();
-                const tbody = document.getElementById('leadsTableBody');
-                document.getElementById('badge-leads-count').innerText = leads ? leads.length : 0;
-                
-                if (!leads || leads.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">No leads found.</td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = leads.map(l => `
-                    <tr class="hover:bg-gray-50">
-                        <td class="py-3 px-3 font-semibold text-gray-800">${l.name || ''}</td>
-                        <td class="py-3 px-3 text-gray-500">${l.email || '-'}</td>
-                        <td class="py-3 px-3 text-gray-500">${l.phone || '-'}</td>
-                        <td class="py-3 px-3 font-medium">₹${l.value || 0}</td>
-                        <td class="py-3 px-3"><span class="bg-blue-50 text-blue-600 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-blue-200">${l.status || 'New'}</span></td>
-                    </tr>
-                `).join('');
-            } catch (err) {
-                console.error(err);
+            if (!supabaseClient) return;
+            const { data } = await supabaseClient.from('crm_leads').select('*');
+            const tbody = document.getElementById('leadsTableBody');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">No leads found.</td></tr>`;
+                return;
             }
+            tbody.innerHTML = data.map(l => `<tr class="hover:bg-gray-50"><td class="py-3 px-3 font-semibold">${l.name}</td><td class="py-3 px-3">${l.email || '-'}</td><td class="py-3 px-3">${l.phone || '-'}</td><td class="py-3 px-3">₹${l.value || 0}</td><td class="py-3 px-3">${l.status || 'New'}</td></tr>`).join('');
         }
 
         async function handleLeadSubmit(event) {
             event.preventDefault();
+            if (!supabaseClient) return;
             const newLead = {
                 name: document.getElementById('lead-name').value,
                 email: document.getElementById('lead-email').value,
@@ -530,59 +432,29 @@
                 value: parseFloat(document.getElementById('lead-value').value) || 0,
                 status: 'New'
             };
-
-            try {
-                await fetch('/api/leads', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newLead)
-                });
-                document.getElementById('leadForm').reset();
-                fetchLeads();
-            } catch (err) {
-                console.error(err);
-            }
+            await supabaseClient.from('crm_leads').insert([newLead]);
+            document.getElementById('leadForm').reset();
+            fetchLeads();
         }
 
-        // Attendance Handlers
         async function fetchAttendance() {
-            try {
-                const response = await fetch('/api/attendance');
-                const logs = await response.json();
-                const tbody = document.getElementById('attendanceTableBody');
-
-                if (!logs || logs.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-400">No attendance records found.</td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = logs.map(a => `
-                    <tr class="hover:bg-gray-50">
-                        <td class="py-3 px-3 font-semibold text-gray-800">${a.employee_name || 'Alex Mercer'}</td>
-                        <td class="py-3 px-3"><span class="bg-emerald-50 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-emerald-200">${a.status || 'Checked In'}</span></td>
-                        <td class="py-3 px-3 text-gray-500">${new Date(a.created_at || Date.now()).toLocaleString()}</td>
-                    </tr>
-                `).join('');
-            } catch (err) {
-                console.error(err);
+            if (!supabaseClient) return;
+            const { data } = await supabaseClient.from('attendance').select('*');
+            const tbody = document.getElementById('attendanceTableBody');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-400">No attendance records.</td></tr>`;
+                return;
             }
+            tbody.innerHTML = data.map(a => `<tr class="hover:bg-gray-50"><td class="py-3 px-3 font-semibold">${a.employee_name}</td><td class="py-3 px-3">${a.status}</td><td class="py-3 px-3">${new Date(a.created_at).toLocaleString()}</td></tr>`).join('');
         }
 
         async function recordAttendance(status) {
-            const entry = { employee_name: 'Alex Mercer', status };
-            try {
-                await fetch('/api/attendance', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(entry)
-                });
-                fetchAttendance();
-            } catch (err) {
-                console.error(err);
-            }
+            if (!supabaseClient) return;
+            await supabaseClient.from('attendance').insert([{ employee_name: 'Alex Mercer', status }]);
+            fetchAttendance();
         }
 
-        // Initial Load
+        // Initialize on load
         fetchCandidates();
     </script>
 </body>
