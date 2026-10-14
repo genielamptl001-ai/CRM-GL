@@ -1,10 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
@@ -15,6 +10,15 @@ export default async function handler(req, res) {
   }
 
   try {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      return res.status(500).json({ error: 'Missing Supabase environment variables on server.' });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('candidates')
@@ -43,7 +47,6 @@ export default async function handler(req, res) {
         .select();
 
       if (error) {
-        console.error('Supabase Error:', error);
         return res.status(400).json({ error: error.message });
       }
 
