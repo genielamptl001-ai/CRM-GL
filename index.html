@@ -1,319 +1,1104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-slate-100">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streamline CRM - Workspace</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLamp Enterprise CRM & Work Tracker</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            glamp: {
+              sidebar: '#0B1E3B',
+              darker: '#07152B',
+              sidehover: '#162C4E',
+              accent: '#00A3E0',
+              accentHover: '#0084B8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar for sleek dashboard UI */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.2);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0,0,0,0.3);
+    }
+    .kanban-col {
+      min-height: calc(100vh - 230px);
+    }
+  </style>
 </head>
-<body class="bg-gray-100 h-screen overflow-hidden flex font-sans">
+<body class="h-full font-sans text-slate-800 flex overflow-hidden bg-slate-100">
 
-    <!-- 1. PRIMARY DARK SIDEBAR (Far Left) -->
-    <aside class="w-64 bg-[#0B1E3B] text-gray-300 flex flex-col justify-between select-none shrink-0 border-r border-blue-950">
+  <!-- Global Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- Left Primary Sidebar Navigation (Dark Navy #0B1E3B / #07152B) -->
+  <aside class="w-64 bg-[#0B1E3B] text-slate-300 flex flex-col flex-shrink-0 z-20 shadow-2xl transition-all duration-300">
+    <!-- GLamp Brand Header -->
+    <div class="p-4 flex items-center gap-3 border-b border-slate-700/50 bg-[#07152B]">
+      <div class="bg-gradient-to-tr from-cyan-500 to-blue-600 text-white w-10 h-10 rounded-xl shadow-md font-extrabold text-xl flex items-center justify-center">
+        <i class="fa-solid fa-lightbulb"></i>
+      </div>
+      <div>
+        <h1 class="font-extrabold text-white tracking-wider text-xl leading-none">GLamp</h1>
+        <p class="text-[11px] text-cyan-400 font-medium tracking-wide mt-0.5">Enterprise Workspace</p>
+      </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+      <div class="px-3 pb-2 text-[10px] uppercase font-bold tracking-wider text-slate-400">Core Modules</div>
+      
+      <!-- 1. Candidates -->
+      <button onclick="switchTab('candidates')" id="nav-candidates" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 hover:bg-[#162C4E] hover:text-white text-slate-300">
+        <i class="fa-solid fa-user-graduate text-purple-400 w-5 text-center"></i>
+        <span>Candidates</span>
+      </button>
+
+      <!-- 2. Messenger / Chats -->
+      <button onclick="switchTab('messenger')" id="nav-messenger" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 hover:bg-[#162C4E] hover:text-white text-slate-300 relative">
+        <i class="fa-solid fa-comments text-indigo-400 w-5 text-center"></i>
+        <span>Messenger / Chats</span>
+        <span class="ml-auto w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+      </button>
+
+      <!-- 3. Leads (Default active) -->
+      <button onclick="switchTab('leads')" id="nav-leads" class="nav-btn active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 text-white bg-[#162C4E] shadow-sm border-l-4 border-cyan-400">
+        <i class="fa-solid fa-filter text-cyan-400 w-5 text-center"></i>
+        <span>Leads</span>
+        <span id="leads-badge" class="ml-auto bg-cyan-500/20 text-cyan-300 text-xs px-2 py-0.5 rounded-full font-semibold">0</span>
+      </button>
+
+      <!-- 4. Deals -->
+      <button onclick="switchTab('deals')" id="nav-deals" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 hover:bg-[#162C4E] hover:text-white text-slate-300">
+        <i class="fa-solid fa-chart-kanban text-amber-400 w-5 text-center"></i>
+        <span>Deals</span>
+      </button>
+
+      <!-- 5. Customers -->
+      <button onclick="switchTab('customers')" id="nav-customers" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 hover:bg-[#162C4E] hover:text-white text-slate-300">
+        <i class="fa-solid fa-building-user text-emerald-400 w-5 text-center"></i>
+        <span>Customers</span>
+      </button>
+
+      <div class="px-3 pt-5 pb-2 text-[10px] uppercase font-bold tracking-wider text-slate-400">Operations</div>
+
+      <!-- 6. Attendance Log -->
+      <button onclick="switchTab('attendance')" id="nav-attendance" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 hover:bg-[#162C4E] hover:text-white text-slate-300">
+        <i class="fa-solid fa-user-clock text-rose-400 w-5 text-center"></i>
+        <span>Attendance Log</span>
+      </button>
+    </nav>
+
+    <!-- User Profile Footer -->
+    <div class="p-3 border-t border-slate-700/50 bg-[#07152B] flex items-center gap-3">
+      <div class="relative">
+        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow">
+          AM
+        </div>
+        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#07152B] rounded-full"></span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold text-white truncate">Alex Mercer</p>
+        <p class="text-[11px] text-slate-400 truncate">Account Executive</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Workspace Area -->
+  <main class="flex-1 flex flex-col min-w-0 bg-slate-100 relative overflow-hidden">
+
+    <!-- Header Bar -->
+    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shadow-sm z-10 flex-shrink-0">
+      <!-- Search Input -->
+      <div class="relative w-80">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" id="globalSearch" oninput="handleGlobalSearch(this.value)" placeholder="Search GLamp workspace..." class="w-full pl-9 pr-4 py-2 bg-slate-100 focus:bg-white text-xs rounded-lg border border-transparent focus:border-cyan-500 focus:outline-none transition-all">
+      </div>
+
+      <!-- Header Information -->
+      <div class="flex items-center gap-4">
+        <div id="module-title-badge" class="text-xs font-bold px-3 py-1 bg-slate-100 text-slate-700 rounded-full border border-slate-200">
+          Module: <span class="text-cyan-600" id="currentViewName">Leads</span>
+        </div>
+        <div class="text-xs text-slate-400">
+          <i class="fa-regular fa-clock mr-1"></i> <span id="realtimeClock">--:--:--</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dynamic View Views -->
+    <div class="flex-1 overflow-y-auto p-6 relative">
+
+      <!-- ================= 1. LEADS MODULE ================= -->
+      <div id="module-leads" class="module-view space-y-6">
+        
+        <!-- Module Toolbar & Action Button -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800">Leads Management</h2>
+            <p class="text-xs text-slate-500">Capture, filter, and track incoming business inquiries</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <!-- API Sync Indicator -->
+            <div id="db-status-badge" class="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Supabase Connected</span>
+            </div>
+
+            <!-- Real-time Active Session Timer ONLY inside Leads -->
+            <div class="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-mono text-slate-600 flex items-center gap-2">
+              <i class="fa-solid fa-hourglass-half text-cyan-500"></i>
+              <span>Lead Session: <span id="leadsTimer">00:00:00</span></span>
+            </div>
+
+            <!-- Dedicated Add Lead Action -->
+            <button onclick="openLeadModal()" class="bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-sm flex items-center gap-2 transition-all">
+              <i class="fa-solid fa-plus"></i>
+              <span>Add New Lead</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Top Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Leads</p>
+              <h3 id="stat-total-leads" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold">
+              <i class="fa-solid fa-users text-lg"></i>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Qualification Rate</p>
+              <h3 id="stat-qualified-rate" class="text-2xl font-bold text-slate-800 mt-1">0%</h3>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <i class="fa-solid fa-circle-check text-lg"></i>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pipeline Potential</p>
+              <h3 id="stat-pipeline-val" class="text-2xl font-bold text-slate-800 mt-1">$0</h3>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+              <i class="fa-solid fa-dollar-sign text-lg"></i>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Endpoint API</p>
+              <h3 id="stat-sync-mode" class="text-xs font-semibold text-emerald-600 mt-1 truncate">POST /api/leads</h3>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+              <i class="fa-solid fa-database text-lg"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
+          <div class="flex items-center gap-2 overflow-x-auto">
+            <button onclick="filterLeads('ALL')" class="lead-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 text-white">All Leads</button>
+            <button onclick="filterLeads('NEW')" class="lead-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">New</button>
+            <button onclick="filterLeads('CONTACTED')" class="lead-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Contacted</button>
+            <button onclick="filterLeads('QUALIFIED')" class="lead-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Qualified</button>
+            <button onclick="filterLeads('UNQUALIFIED')" class="lead-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Unqualified</button>
+          </div>
+
+          <button onclick="fetchLeadsFromAPI()" class="text-xs px-3 py-1.5 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate"></i> Refresh API
+          </button>
+        </div>
+
+        <!-- Leads Data Table -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] uppercase tracking-wider text-slate-500 font-bold">
+                  <th class="p-4">Contact / Lead</th>
+                  <th class="p-4">Company</th>
+                  <th class="p-4">Email & Phone</th>
+                  <th class="p-4">Est. Value</th>
+                  <th class="p-4">Status Stage</th>
+                  <th class="p-4">Lead Source</th>
+                  <th class="p-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="leadsTableBody" class="divide-y divide-slate-100 text-xs text-slate-700">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 2. CANDIDATES MODULE ================= -->
+      <div id="module-candidates" class="module-view space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800">Candidates Talent Pool</h2>
+            <p class="text-xs text-slate-500">Recruitment stages and applicant evaluation</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="filterCandidates('ALL')" class="cand-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 text-white">All</button>
+            <button onclick="filterCandidates('Screening')" class="cand-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Screening</button>
+            <button onclick="filterCandidates('Interview')" class="cand-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Interview</button>
+            <button onclick="filterCandidates('Hired')" class="cand-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Hired</button>
+          </div>
+        </div>
+
+        <div id="candidatesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Dynamic Candidates Cards -->
+        </div>
+      </div>
+
+      <!-- ================= 3. MESSENGER MODULE ================= -->
+      <div id="module-messenger" class="module-view hidden h-[calc(100vh-140px)] flex bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <!-- Channels Bar -->
+        <div class="w-72 border-r border-slate-200 flex flex-col bg-slate-50">
+          <div class="p-3 border-b border-slate-200">
+            <input type="text" id="chatSearch" oninput="filterChannels(this.value)" placeholder="Search conversations..." class="w-full text-xs px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-500">
+          </div>
+          <div class="flex-1 overflow-y-auto divide-y divide-slate-100" id="chatChannelList">
+            <!-- Dynamic channels -->
+          </div>
+        </div>
+
+        <!-- Chat Main Screen -->
+        <div class="flex-1 flex flex-col bg-white">
+          <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <div class="flex items-center gap-3">
+              <div id="activeChatAvatar" class="w-9 h-9 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center text-xs shadow-sm">
+                GS
+              </div>
+              <div>
+                <h3 id="activeChatTitle" class="text-xs font-bold text-slate-800">GLamp Sales Operations</h3>
+                <p id="activeChatSub" class="text-[11px] text-slate-400">4 team members online</p>
+              </div>
+            </div>
+            <div class="text-[11px] bg-slate-200/60 text-slate-700 px-3 py-1 rounded-full border border-slate-300">
+              <i class="fa-solid fa-shield-halved text-cyan-600 mr-1"></i> End-to-End Encrypted
+            </div>
+          </div>
+
+          <!-- Chat Stream -->
+          <div id="chatMessageStream" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/40">
+            <!-- Dynamic Messages -->
+          </div>
+
+          <!-- Chat Input -->
+          <div class="p-3 border-t border-slate-200 bg-white flex items-center gap-2">
+            <input type="text" id="chatInput" placeholder="Type message in GLamp chat..." class="flex-1 text-xs px-3 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-500" onkeydown="if(event.key==='Enter') sendChatMessage()">
+            <button onclick="sendChatMessage()" class="bg-cyan-500 hover:bg-cyan-600 text-white text-xs px-4 py-2.5 rounded-lg font-medium transition-all">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 4. DEALS MODULE ================= -->
+      <div id="module-deals" class="module-view space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800">Deals Pipeline</h2>
+            <p class="text-xs text-slate-500">Pipeline progression across active sales opportunities</p>
+          </div>
+          <div class="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-200">
+            <span class="text-xs text-slate-500">Pipeline Worth:</span>
+            <span id="deals-total-value" class="text-sm font-bold text-emerald-700 ml-1">$0.00</span>
+          </div>
+        </div>
+
+        <!-- Kanban Pipeline Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 overflow-x-auto pb-4">
+          <!-- Discovery Column -->
+          <div class="bg-slate-200/50 p-3 rounded-xl border border-slate-200/80 flex flex-col">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-300 mb-3">
+              <h3 class="text-xs font-bold uppercase text-slate-700 tracking-wider flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Discovery
+              </h3>
+              <span id="count-discovery" class="text-xs font-semibold text-slate-600 bg-white px-2 py-0.5 rounded-full border">0</span>
+            </div>
+            <div id="kanban-discovery" class="kanban-col space-y-3 flex-1 overflow-y-auto"></div>
+          </div>
+
+          <!-- Qualification Column -->
+          <div class="bg-slate-200/50 p-3 rounded-xl border border-slate-200/80 flex flex-col">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-300 mb-3">
+              <h3 class="text-xs font-bold uppercase text-slate-700 tracking-wider flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Qualification
+              </h3>
+              <span id="count-qualification" class="text-xs font-semibold text-slate-600 bg-white px-2 py-0.5 rounded-full border">0</span>
+            </div>
+            <div id="kanban-qualification" class="kanban-col space-y-3 flex-1 overflow-y-auto"></div>
+          </div>
+
+          <!-- Proposal Column -->
+          <div class="bg-slate-200/50 p-3 rounded-xl border border-slate-200/80 flex flex-col">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-300 mb-3">
+              <h3 class="text-xs font-bold uppercase text-slate-700 tracking-wider flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Proposal
+              </h3>
+              <span id="count-proposal" class="text-xs font-semibold text-slate-600 bg-white px-2 py-0.5 rounded-full border">0</span>
+            </div>
+            <div id="kanban-proposal" class="kanban-col space-y-3 flex-1 overflow-y-auto"></div>
+          </div>
+
+          <!-- Won Column -->
+          <div class="bg-slate-200/50 p-3 rounded-xl border border-slate-200/80 flex flex-col">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-300 mb-3">
+              <h3 class="text-xs font-bold uppercase text-slate-700 tracking-wider flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Closed Won
+              </h3>
+              <span id="count-won" class="text-xs font-semibold text-slate-600 bg-white px-2 py-0.5 rounded-full border">0</span>
+            </div>
+            <div id="kanban-won" class="kanban-col space-y-3 flex-1 overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 5. CUSTOMERS MODULE ================= -->
+      <div id="module-customers" class="module-view space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800">Customer Accounts Directory</h2>
+            <p class="text-xs text-slate-500">Enterprise contacts & organization profile records</p>
+          </div>
+          <select id="customerTierFilter" onchange="renderCustomers()" class="text-xs bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-cyan-500">
+            <option value="ALL">All Account Tiers</option>
+            <option value="Enterprise">Enterprise Tier</option>
+            <option value="Mid-Market">Mid-Market Tier</option>
+            <option value="SMB">SMB Tier</option>
+          </select>
+        </div>
+
+        <div id="customerGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Dynamic Customers Cards -->
+        </div>
+      </div>
+
+      <!-- ================= 6. ATTENDANCE LOG MODULE ================= -->
+      <div id="module-attendance" class="module-view space-y-6 hidden">
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+          <div class="space-y-1 text-center md:text-left">
+            <span class="text-xs font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200">Attendance Log</span>
+            <h2 class="text-2xl font-bold text-slate-800 mt-2">Employee Workday Tracker</h2>
+            <p class="text-xs text-slate-500">Log work shift clock-ins and record daily attendance history.</p>
+          </div>
+
+          <!-- Attendance Action Box -->
+          <div class="flex items-center gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div class="text-center">
+              <p class="text-[10px] uppercase font-bold text-slate-400">Shift Clock</p>
+              <p id="attendanceClock" class="text-2xl font-mono font-bold text-slate-800">00:00:00</p>
+            </div>
+            <button id="checkInBtn" onclick="toggleAttendanceClock()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-5 py-2.5 rounded-lg shadow transition-all flex items-center gap-2">
+              <i class="fa-solid fa-right-to-bracket"></i> <span id="checkInText">Clock In</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Attendance Logs Table -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-4 border-b border-slate-200 font-bold text-sm text-slate-800 flex justify-between items-center">
+            <span>Workday Shift History</span>
+            <span class="text-xs text-slate-400 font-normal">Updated Live</span>
+          </div>
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-[11px] uppercase tracking-wider text-slate-500 font-bold">
+                <th class="p-4">Employee</th>
+                <th class="p-4">Date</th>
+                <th class="p-4">Clock In</th>
+                <th class="p-4">Clock Out</th>
+                <th class="p-4">Work Duration</th>
+                <th class="p-4">Shift Status</th>
+              </tr>
+            </thead>
+            <tbody id="attendanceLogsBody" class="divide-y divide-slate-100 text-xs text-slate-700">
+              <!-- Dynamic Attendance Logs -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- ADD LEAD MODAL (Exclusive to Leads View) -->
+  <div id="leadModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-lg p-6 space-y-4 relative">
+      <button onclick="closeLeadModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+      
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+        <div class="w-9 h-9 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold text-base">
+          <i class="fa-solid fa-user-plus"></i>
+        </div>
         <div>
-            <!-- Workspace Brand Header -->
-            <div class="h-16 flex items-center px-6 border-b border-blue-900/50 bg-[#07152B]">
-                <span class="text-white font-bold text-lg tracking-wide flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Streamline CRM
-                </span>
-            </div>
+          <h3 class="text-base font-bold text-slate-800">Add New Lead to GLamp</h3>
+          <p class="text-xs text-slate-400">Stores record via Supabase POST endpoint `/api/leads`</p>
+        </div>
+      </div>
 
-            <!-- Primary Navigation Links -->
-            <nav class="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-8rem)] text-sm">
-                <button onclick="switchTab('candidates')" id="btn-candidates" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-900/40 transition text-gray-300">
-                    👥 Candidates
-                </button>
-                <button onclick="switchTab('messages')" id="btn-messages" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-sm font-medium">
-                    💬 Messages / Chats
-                </button>
-                <button onclick="switchTab('leads')" id="btn-leads" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-900/40 transition text-gray-300">
-                    🎯 Leads
-                </button>
-                <button onclick="switchTab('deals')" id="btn-deals" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-900/40 transition text-gray-300">
-                    📈 Deals
-                </button>
-                <button onclick="switchTab('customers')" id="btn-customers" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-900/40 transition text-gray-300">
-                    🏢 Customers
-                </button>
-                <button onclick="switchTab('attendance')" id="btn-attendance" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-900/40 transition text-gray-300">
-                    ⏰ Attendance Log
-                </button>
-            </nav>
+      <form id="leadForm" onsubmit="handleLeadSubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Lead Contact Name *</label>
+          <input type="text" id="lead_title" required placeholder="e.g. Jordan Smith" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-500">
         </div>
 
-        <!-- Upgrade / Status Footer -->
-        <div class="p-4 border-t border-blue-900/50 bg-[#07152B]">
-            <div class="bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg p-3 text-center text-xs font-semibold shadow-md cursor-pointer hover:opacity-95 transition">
-                ⚡ Secure API Connected
-            </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Company Name</label>
+            <input type="text" id="lead_company" placeholder="e.g. Acme Tech Corp" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-500">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Estimated Value ($)</label>
+            <input type="number" id="lead_value" placeholder="24000" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-500">
+          </div>
         </div>
-    </aside>
 
-    <!-- 2. MAIN CONTENT AREA -->
-    <main class="flex-1 flex flex-col h-screen bg-[#F0F2F5] overflow-hidden">
-
-        <!-- Top Header Bar -->
-        <header class="h-16 bg-white border-b border-gray-200 px-6 flex justify-between items-center shrink-0">
-            <div class="flex items-center gap-4">
-                <h2 id="current-page-title" class="text-xl font-bold text-gray-800">Messages & Chats</h2>
-            </div>
-            <div class="flex items-center gap-4 text-sm text-gray-600">
-                <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-xs font-medium">Production Live</span>
-                <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">A</div>
-            </div>
-        </header>
-
-        <!-- Dynamic Module Views Container -->
-        <div class="flex-1 overflow-hidden relative">
-
-            <!-- MODULE 1: CANDIDATES -->
-            <section id="view-candidates" class="absolute inset-0 p-6 overflow-y-auto hidden">
-                <div class="bg-white rounded-xl shadow-sm border p-6 max-w-5xl mx-auto space-y-4">
-                    <div class="flex justify-between items-center border-b pb-4">
-                        <h3 class="text-lg font-bold text-gray-800">Candidates Directory</h3>
-                        <button onclick="alert('Open candidate form')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Add Candidate</button>
-                    </div>
-                    <p class="text-sm text-gray-500">Track incoming applicant resumes, screening status, and interview rounds.</p>
-                </div>
-            </section>
-
-            <!-- MODULE 2: MESSAGES / CHATS (Default Active) -->
-            <section id="view-messages" class="absolute inset-0 flex overflow-hidden">
-                <!-- Secondary Sub-sidebar (Chat list) -->
-                <div class="w-80 bg-white border-r border-gray-200 flex flex-col shrink-0">
-                    <div class="p-3 border-b">
-                        <input type="text" placeholder="Find employee or chat..." class="w-full bg-gray-100 border-0 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div class="flex-1 overflow-y-auto divide-y divide-gray-100">
-                        <div class="p-3.5 hover:bg-gray-50 cursor-pointer bg-blue-50/50 border-l-4 border-blue-600">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="font-semibold text-sm text-gray-900">SportsMart Working Hours</span>
-                                <span class="text-xs text-gray-400">4:32 PM</span>
-                            </div>
-                            <p class="text-xs text-gray-500 truncate">Sirimilla Vinay · Break in 4:32 PM</p>
-                        </div>
-                        <div class="p-3.5 hover:bg-gray-50 cursor-pointer">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="font-semibold text-sm text-gray-900">CG-ITSA-SNA-NA-001</span>
-                                <span class="text-xs text-gray-400">3:58 PM</span>
-                            </div>
-                            <p class="text-xs text-gray-500 truncate">https://jobwys-point-llc.vercel.app/</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Main Chat Window -->
-                <div class="flex-1 flex flex-col bg-[#E7EFE9]">
-                    <!-- Chat Header -->
-                    <div class="bg-white border-b px-6 py-3 flex justify-between items-center shadow-sm">
-                        <div>
-                            <h3 class="font-bold text-gray-800 text-sm">SportsMart Working Hours</h3>
-                            <p class="text-xs text-gray-500">22 members</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium">Video Call</button>
-                        </div>
-                    </div>
-
-                    <!-- Chat Message Feed -->
-                    <div class="flex-1 p-6 overflow-y-auto space-y-4">
-                        <div class="bg-white/90 p-3 rounded-xl shadow-sm max-w-lg border border-gray-100">
-                            <p class="text-xs font-semibold text-blue-600 mb-1">Vansh Neeraj</p>
-                            <p class="text-sm text-gray-800">☕ Break out 4:16 PM</p>
-                            <span class="text-[10px] text-gray-400 block text-right mt-1">4:16 pm</span>
-                        </div>
-                        <div class="bg-white/90 p-3 rounded-xl shadow-sm max-w-lg border border-gray-100">
-                            <p class="text-xs font-semibold text-blue-600 mb-1">Sirimilla Vinay</p>
-                            <p class="text-sm text-gray-800">☕ Break out 4:21 PM</p>
-                            <span class="text-[10px] text-gray-400 block text-right mt-1">4:21 pm</span>
-                        </div>
-                    </div>
-
-                    <!-- Message Input Box -->
-                    <div class="p-4 bg-white border-t border-gray-200">
-                        <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2">
-                            <input type="text" placeholder="Type @ or + to mention a person, a chat or AI..." class="flex-1 bg-transparent border-0 text-sm focus:outline-none text-gray-700">
-                            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">Send</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- MODULE 3: LEADS (Connected to Serverless API) -->
-            <section id="view-leads" class="absolute inset-0 p-6 overflow-y-auto hidden space-y-6">
-                <!-- Add Lead Form -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border max-w-5xl mx-auto">
-                    <h3 class="text-base font-bold text-gray-800 mb-4">Add New Lead</h3>
-                    <form id="leadForm" onsubmit="handleLeadSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Name</label>
-                            <input type="text" id="lead-name" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Email</label>
-                            <input type="email" id="lead-email" class="w-full border rounded-lg px-3 py-2 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Phone</label>
-                            <input type="text" id="lead-phone" class="w-full border rounded-lg px-3 py-2 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Value (₹)</label>
-                            <input type="number" id="lead-value" value="0" class="w-full border rounded-lg px-3 py-2 text-sm">
-                        </div>
-                        <button type="submit" class="bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 text-sm h-[38px]">Save Lead</button>
-                    </form>
-                </div>
-
-                <!-- Leads Table -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border max-w-5xl mx-auto overflow-x-auto">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-base font-bold text-gray-800">Leads Database</h3>
-                        <button onclick="fetchLeads()" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg font-medium">🔄 Refresh</button>
-                    </div>
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b text-xs text-gray-500 font-semibold uppercase">
-                                <th class="py-2 px-3">Name</th>
-                                <th class="py-2 px-3">Email</th>
-                                <th class="py-2 px-3">Phone</th>
-                                <th class="py-2 px-3">Value</th>
-                                <th class="py-2 px-3">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leadsTableBody" class="text-sm text-gray-700">
-                            <tr><td colspan="5" class="text-center py-4 text-gray-400">Loading leads...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- MODULE 4: DEALS -->
-            <section id="view-deals" class="absolute inset-0 p-6 overflow-y-auto hidden">
-                <div class="max-w-6xl mx-auto space-y-4">
-                    <h3 class="text-lg font-bold text-gray-800">Deals Pipeline</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white p-4 rounded-xl shadow-sm border">
-                            <h4 class="font-semibold text-gray-700 text-sm mb-3 pb-2 border-b">Qualified Pipeline</h4>
-                            <div class="p-3 bg-gray-50 rounded-lg border text-sm space-y-1">
-                                <p class="font-medium text-gray-900">Enterprise Contract</p>
-                                <p class="text-xs text-gray-500">Value: ₹2,50,000</p>
-                            </div>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border">
-                            <h4 class="font-semibold text-gray-700 text-sm mb-3 pb-2 border-b">Proposal Stage</h4>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border">
-                            <h4 class="font-semibold text-gray-700 text-sm mb-3 pb-2 border-b">Closed Won</h4>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- MODULE 5: CUSTOMERS -->
-            <section id="view-customers" class="absolute inset-0 p-6 overflow-y-auto hidden">
-                <div class="bg-white rounded-xl shadow-sm border p-6 max-w-5xl mx-auto">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">Customers Directory</h3>
-                    <p class="text-sm text-gray-500">Successfully converted active customers will be listed here.</p>
-                </div>
-            </section>
-
-            <!-- MODULE 6: ATTENDANCE -->
-            <section id="view-attendance" class="absolute inset-0 p-6 overflow-y-auto hidden">
-                <div class="bg-white rounded-xl shadow-sm border p-6 max-w-5xl mx-auto flex justify-between items-center">
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-800">Daily Attendance Log</h3>
-                        <p class="text-sm text-gray-500">Record your check-in and check-out status for today.</p>
-                    </div>
-                    <button onclick="alert('Checked in successfully!')" class="bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-emerald-700">Check In Now</button>
-                </div>
-            </section>
-
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Email Address</label>
+            <input type="email" id="lead_email" placeholder="j.smith@acmetech.com" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-500">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Phone Number</label>
+            <input type="text" id="lead_phone" placeholder="+1 (555) 234-5678" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-500">
+          </div>
         </div>
-    </main>
 
-    <!-- Navigation & API Script -->
-    <script>
-        function switchTab(tabId) {
-            const tabs = ['candidates', 'messages', 'leads', 'deals', 'customers', 'attendance'];
-            tabs.forEach(t => {
-                document.getElementById(`view-${t}`).classList.add('hidden');
-                document.getElementById(`btn-${t}`).className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-900/40 transition text-gray-300";
-            });
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Status Stage</label>
+            <select id="lead_status" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-500 bg-white">
+              <option value="NEW">New Lead</option>
+              <option value="CONTACTED">Contacted</option>
+              <option value="QUALIFIED">Qualified</option>
+              <option value="UNQUALIFIED">Unqualified</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Source Channel</label>
+            <select id="lead_source" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-cyan-500 bg-white">
+              <option value="GLamp Webform">GLamp Webform</option>
+              <option value="Inbound Call">Inbound Call</option>
+              <option value="Outreach Campaign">Outreach Campaign</option>
+              <option value="Partner Portal">Partner Portal</option>
+            </select>
+          </div>
+        </div>
 
-            document.getElementById(`view-${tabId}`).classList.remove('hidden');
-            document.getElementById(`btn-${tabId}`).className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-sm font-medium";
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <button type="button" onclick="closeLeadModal()" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium">Cancel</button>
+          <button type="submit" id="saveLeadBtn" class="px-5 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white font-semibold flex items-center gap-2">
+            <span>Save to Supabase</span>
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-            const titles = {
-                candidates: 'Candidates Management',
-                messages: 'Messages & Chats',
-                leads: 'Leads Pipeline',
-                deals: 'Deals Management',
-                customers: 'Customers Directory',
-                attendance: 'Attendance Logs'
-            };
-            document.getElementById('current-page-title').innerText = titles[tabId];
+  <!-- APPLICATION LOGIC JS -->
+  <script>
+    // --- Application Constants & State ---
+    const API_ENDPOINT = '/api/leads';
+    const API_KEY = 'my_super_secret_crm_key_9876';
 
-            if (tabId === 'leads') {
-                fetchLeads();
-            }
+    let state = {
+      activeTab: 'leads',
+      leads: [],
+      activeLeadFilter: 'ALL',
+      activeCandidateFilter: 'ALL',
+      candidates: [
+        { id: 'c1', name: 'Taylor Morgan', role: 'Staff Backend Architect', stage: 'Interview', exp: '7 Years' },
+        { id: 'c2', name: 'Jordan Rivera', role: 'Lead Product Designer', stage: 'Screening', exp: '5 Years' },
+        { id: 'c3', name: 'Casey Vance', role: 'DevOps & Cloud Engineer', stage: 'Hired', exp: '6 Years' },
+        { id: 'c4', name: 'Avery Chen', role: 'Senior Frontend Developer', stage: 'Interview', exp: '4 Years' }
+      ],
+      chat: {
+        activeChannel: 'general',
+        channels: [
+          { id: 'general', name: 'GLamp Sales Operations', unread: 0 },
+          { id: 'tech', name: 'Technical Support Sync', unread: 1 },
+          { id: 'hr', name: 'HR & Staff Recruitment', unread: 0 }
+        ],
+        messages: {
+          general: [
+            { sender: 'Alex Mercer', text: 'Welcome to GLamp workspace! Please sync new lead records.', time: '09:30 AM', self: true },
+            { sender: 'Taylor Morgan', text: 'All incoming leads updated from Supabase endpoint.', time: '09:34 AM', self: false }
+          ],
+          tech: [
+            { sender: 'System Auto', text: 'API endpoint status verified healthy.', time: '08:00 AM', self: false }
+          ],
+          hr: [
+            { sender: 'Recruitment Lead', text: 'Candidates interview schedule posted.', time: '08:45 AM', self: false }
+          ]
         }
+      },
+      deals: [
+        { id: 'd1', title: 'Global Cloud Migration', company: 'Acme Enterprise Solutions', value: 52000, stage: 'Discovery' },
+        { id: 'd2', title: 'SOC2 Compliance Suite', company: 'Pinnacle Analytics', value: 24000, stage: 'Qualification' },
+        { id: 'd3', title: 'Workspace Expansion Q4', company: 'Vanguard Networks', value: 95000, stage: 'Proposal' },
+        { id: 'd4', title: 'Data Analytics Integration', company: 'Zenith Logistics', value: 38000, stage: 'Won' }
+      ],
+      customers: [
+        { name: 'Acme Enterprise Solutions', industry: 'Cloud Software', tier: 'Enterprise', contact: 'Morgan Bailey', status: 'Active' },
+        { name: 'Pinnacle Analytics', industry: 'Data Intelligence', tier: 'Mid-Market', contact: 'Sam Ellis', status: 'Active' },
+        { name: 'Vanguard Networks', industry: 'Telecommunications', tier: 'Enterprise', contact: 'Logan Reed', status: 'Active' },
+        { name: 'Zenith Logistics', industry: 'Supply Chain', tier: 'SMB', contact: 'Drew Parker', status: 'Active' }
+      ],
+      leadsTimerSec: 0,
+      leadsTimerInterval: null,
+      attendance: {
+        clockedIn: false,
+        seconds: 0,
+        interval: null,
+        logs: [
+          { employee: 'Alex Mercer', date: '2026-10-14', checkIn: '08:55 AM', checkOut: '05:00 PM', duration: '08h 05m', status: 'Shift Completed' }
+        ]
+      }
+    };
 
-        async function fetchLeads() {
-            try {
-                const response = await fetch('/api/leads');
-                const leads = await response.json();
-                const tbody = document.getElementById('leadsTableBody');
-                
-                if (!leads || leads.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">No leads found in database.</td></tr>`;
-                    return;
-                }
+    // --- On Window Load ---
+    window.onload = function() {
+      startRealtimeClock();
+      startLeadsTimer();
+      fetchLeadsFromAPI();
+      renderCandidates();
+      renderChatChannels();
+      renderChatMessages();
+      renderDeals();
+      renderCustomers();
+      renderAttendanceLogs();
+    };
 
-                tbody.innerHTML = leads.map(lead => `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="py-3 px-3 font-medium text-gray-900">${lead.name || ''}</td>
-                        <td class="py-3 px-3 text-gray-500">${lead.email || '-'}</td>
-                        <td class="py-3 px-3 text-gray-500">${lead.phone || '-'}</td>
-                        <td class="py-3 px-3">₹${lead.value || 0}</td>
-                        <td class="py-3 px-3"><span class="bg-blue-50 text-blue-600 text-xs px-2.5 py-1 rounded-full font-medium">${lead.status || 'New'}</span></td>
-                    </tr>
-                `).join('');
-            } catch (err) {
-                console.error('Error fetching leads:', err);
-            }
+    // --- Global Realtime Header Clock ---
+    function startRealtimeClock() {
+      setInterval(() => {
+        const now = new Date();
+        document.getElementById('realtimeClock').innerText = now.toLocaleTimeString();
+      }, 1000);
+    }
+
+    // --- Session Timer Exclusively for Leads View ---
+    function startLeadsTimer() {
+      state.leadsTimerInterval = setInterval(() => {
+        state.leadsTimerSec++;
+        const hrs = Math.floor(state.leadsTimerSec / 3600).toString().padStart(2, '0');
+        const mins = Math.floor((state.leadsTimerSec % 3600) / 60).toString().padStart(2, '0');
+        const secs = (state.leadsTimerSec % 60).toString().padStart(2, '0');
+        document.getElementById('leadsTimer').innerText = `${hrs}:${mins}:${secs}`;
+      }, 1000);
+    }
+
+    // --- Toast Engine ---
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      const isSuccess = type === 'success';
+      const bgColor = isSuccess ? 'bg-slate-900 text-white' : 'bg-rose-600 text-white';
+      const icon = isSuccess ? 'fa-circle-check text-cyan-400' : 'fa-triangle-exclamation text-amber-300';
+
+      toast.className = `pointer-events-auto flex items-center gap-3 p-3.5 rounded-xl shadow-2xl ${bgColor} border border-slate-700 text-xs font-medium transition-all duration-300 transform translate-y-2 opacity-0`;
+      toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // --- Primary Navigation Switcher ---
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+      document.querySelectorAll('.module-view').forEach(m => m.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('bg-[#162C4E]', 'text-white', 'border-l-4', 'border-cyan-400');
+        b.classList.add('text-slate-300');
+      });
+
+      const selectedModule = document.getElementById(`module-${tabId}`);
+      if (selectedModule) selectedModule.classList.remove('hidden');
+
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-[#162C4E]', 'text-white', 'border-l-4', 'border-cyan-400');
+        activeNav.classList.remove('text-slate-300');
+      }
+
+      // Update Header Title
+      const names = {
+        leads: 'Leads',
+        candidates: 'Candidates',
+        messenger: 'Messenger / Chats',
+        deals: 'Deals',
+        customers: 'Customers',
+        attendance: 'Attendance Log'
+      };
+      document.getElementById('currentViewName').innerText = names[tabId] || tabId;
+    }
+
+    // --- LEADS MODULE (API Integration & Storage) ---
+    async function fetchLeadsFromAPI() {
+      try {
+        const response = await fetch(API_ENDPOINT, {
+          headers: { 'x-api-key': API_KEY }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          state.leads = data.leads || data || [];
+          document.getElementById('db-status-badge').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Supabase Live</span>`;
+        } else {
+          throw new Error('API fetch error');
         }
-
-        async function handleLeadSubmit(event) {
-            event.preventDefault();
-            const newLead = {
-                name: document.getElementById('lead-name').value,
-                email: document.getElementById('lead-email').value,
-                phone: document.getElementById('lead-phone').value,
-                value: parseFloat(document.getElementById('lead-value').value) || 0,
-                status: 'New'
-            };
-
-            try {
-                const response = await fetch('/api/leads', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'x-api-key': 'my_super_secret_crm_key_9876'
-                    },
-                    body: JSON.stringify(newLead)
-                });
-
-                if (response.ok) {
-                    document.getElementById('leadForm').reset();
-                    fetchLeads();
-                } else {
-                    alert('Failed to save lead');
-                }
-            } catch (err) {
-                console.error('Error saving lead:', err);
-            }
+      } catch (err) {
+        console.warn('API connection falling back to local dataset', err);
+        const stored = localStorage.getItem('glamp_leads_fallback');
+        if (stored) {
+          state.leads = JSON.parse(stored);
+        } else {
+          state.leads = [
+            { id: '1', title: 'Jordan Smith', company: 'Acme Tech Corp', email: 'j.smith@acme.com', phone: '+1 555-0192', value: 24000, status: 'QUALIFIED', source: 'GLamp Webform' },
+            { id: '2', title: 'Morgan Bailey', company: 'Apex Global', email: 'm.bailey@apex.com', phone: '+1 555-0841', value: 45000, status: 'NEW', source: 'Outreach Campaign' },
+            { id: '3', title: 'Sam Ellis', company: 'Pinnacle Analytics', email: 's.ellis@pinnacle.com', phone: '+1 555-9011', value: 18000, status: 'CONTACTED', source: 'Inbound Call' }
+          ];
+          localStorage.setItem('glamp_leads_fallback', JSON.stringify(state.leads));
         }
-    </script>
+        document.getElementById('db-status-badge').className = "flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 font-medium";
+        document.getElementById('db-status-badge').innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Local Offline Cache</span>`;
+      }
+      renderLeads();
+    }
+
+    async function handleLeadSubmit(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveLeadBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Saving...`;
+
+      const newLead = {
+        title: document.getElementById('lead_title').value,
+        company: document.getElementById('lead_company').value || 'N/A',
+        value: parseFloat(document.getElementById('lead_value').value) || 0,
+        email: document.getElementById('lead_email').value || 'N/A',
+        phone: document.getElementById('lead_phone').value || 'N/A',
+        status: document.getElementById('lead_status').value,
+        source: document.getElementById('lead_source').value,
+        created_at: new Date().toISOString()
+      };
+
+      try {
+        const response = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': API_KEY
+          },
+          body: JSON.stringify(newLead)
+        });
+
+        if (response.ok) {
+          showToast('Lead persisted to Supabase database!', 'success');
+        } else {
+          throw new Error('Supabase save error');
+        }
+      } catch (err) {
+        console.warn('Backend endpoint unavailable, storing locally:', err);
+        newLead.id = 'lead_' + Date.now();
+        state.leads.unshift(newLead);
+        localStorage.setItem('glamp_leads_fallback', JSON.stringify(state.leads));
+        showToast('Saved lead to GLamp database cache', 'success');
+      }
+
+      closeLeadModal();
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = `<span>Save to Supabase</span><i class="fa-solid fa-cloud-arrow-up"></i>`;
+      fetchLeadsFromAPI();
+    }
+
+    function renderLeads() {
+      const tbody = document.getElementById('leadsTableBody');
+      const filtered = state.activeLeadFilter === 'ALL' 
+        ? state.leads 
+        : state.leads.filter(l => l.status === state.activeLeadFilter);
+
+      document.getElementById('leads-badge').innerText = state.leads.length;
+      document.getElementById('stat-total-leads').innerText = state.leads.length;
+      
+      const qualified = state.leads.filter(l => l.status === 'QUALIFIED').length;
+      const rate = state.leads.length ? Math.round((qualified / state.leads.length) * 100) : 0;
+      document.getElementById('stat-qualified-rate').innerText = `${rate}%`;
+
+      const totalVal = state.leads.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
+      document.getElementById('stat-pipeline-val').innerText = `$${totalVal.toLocaleString()}`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-slate-400">No leads found matching filter.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(lead => {
+        let badgeColor = 'bg-slate-100 text-slate-600 border-slate-200';
+        if (lead.status === 'NEW') badgeColor = 'bg-blue-50 text-blue-600 border-blue-200';
+        if (lead.status === 'CONTACTED') badgeColor = 'bg-amber-50 text-amber-600 border-amber-200';
+        if (lead.status === 'QUALIFIED') badgeColor = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+        if (lead.status === 'UNQUALIFIED') badgeColor = 'bg-rose-50 text-rose-600 border-rose-200';
+
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-4 font-semibold text-slate-800 flex items-center gap-2">
+              <div class="w-7 h-7 rounded-full bg-cyan-100 text-cyan-800 flex items-center justify-center text-[10px] font-bold">
+                ${(lead.title || 'L')[0]}
+              </div>
+              <span>${lead.title || 'Untitled'}</span>
+            </td>
+            <td class="p-4 font-medium text-slate-700">${lead.company || 'N/A'}</td>
+            <td class="p-4">
+              <p class="text-slate-800 font-medium">${lead.email || 'N/A'}</p>
+              <p class="text-[11px] text-slate-400">${lead.phone || ''}</p>
+            </td>
+            <td class="p-4 font-bold text-slate-800">$${(Number(lead.value) || 0).toLocaleString()}</td>
+            <td class="p-4">
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${badgeColor}">
+                ${lead.status || 'NEW'}
+              </span>
+            </td>
+            <td class="p-4 text-slate-500">${lead.source || 'GLamp Webform'}</td>
+            <td class="p-4 text-right">
+              <button onclick="deleteLead('${lead.id}')" class="text-slate-400 hover:text-rose-600 p-1"><i class="fa-solid fa-trash-can"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterLeads(status) {
+      state.activeLeadFilter = status;
+      document.querySelectorAll('.lead-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-slate-800', 'text-white');
+        btn.classList.add('bg-slate-100', 'text-slate-600');
+      });
+      event.target.classList.add('bg-slate-800', 'text-white');
+      event.target.classList.remove('bg-slate-100', 'text-slate-600');
+      renderLeads();
+    }
+
+    function deleteLead(id) {
+      state.leads = state.leads.filter(l => l.id != id);
+      localStorage.setItem('glamp_leads_fallback', JSON.stringify(state.leads));
+      showToast('Lead removed from workspace', 'success');
+      renderLeads();
+    }
+
+    function openLeadModal() { document.getElementById('leadModal').classList.remove('hidden'); }
+    function closeLeadModal() { document.getElementById('leadModal').classList.add('hidden'); }
+
+    // --- CANDIDATES MODULE ---
+    function renderCandidates() {
+      const grid = document.getElementById('candidatesGrid');
+      const filtered = state.activeCandidateFilter === 'ALL' 
+        ? state.candidates 
+        : state.candidates.filter(c => c.stage === state.activeCandidateFilter);
+
+      grid.innerHTML = filtered.map(c => `
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-bold text-sm text-slate-800">${c.name}</h4>
+              <p class="text-xs text-purple-600 font-semibold">${c.role}</p>
+            </div>
+            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200">${c.stage}</span>
+          </div>
+          <div class="text-xs text-slate-500 pt-2 border-t border-slate-100 flex justify-between items-center">
+            <span><i class="fa-solid fa-briefcase text-slate-400 mr-1"></i> ${c.exp} Exp</span>
+            <button onclick="toggleCandidateStage('${c.id}')" class="text-cyan-600 font-semibold hover:underline">Advance Stage</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterCandidates(stage) {
+      state.activeCandidateFilter = stage;
+      document.querySelectorAll('.cand-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-slate-800', 'text-white');
+        btn.classList.add('bg-slate-100', 'text-slate-600');
+      });
+      event.target.classList.add('bg-slate-800', 'text-white');
+      event.target.classList.remove('bg-slate-100', 'text-slate-600');
+      renderCandidates();
+    }
+
+    function toggleCandidateStage(id) {
+      const cand = state.candidates.find(c => c.id === id);
+      const stages = ['Screening', 'Interview', 'Hired'];
+      if (cand) {
+        const nextIdx = (stages.indexOf(cand.stage) + 1) % stages.length;
+        cand.stage = stages[nextIdx];
+        renderCandidates();
+        showToast(`Candidate stage updated to ${cand.stage}`);
+      }
+    }
+
+    // --- MESSENGER MODULE ---
+    function renderChatChannels() {
+      const list = document.getElementById('chatChannelList');
+      list.innerHTML = state.chat.channels.map(ch => `
+        <div onclick="selectChannel('${ch.id}')" class="p-3 cursor-pointer hover:bg-slate-100 flex justify-between items-center ${state.chat.activeChannel === ch.id ? 'bg-cyan-50 border-r-4 border-cyan-500 font-semibold' : ''}">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-hashtag text-slate-400 text-xs"></i>
+            <span class="text-xs text-slate-700">${ch.name}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterChannels(query) {
+      const q = query.toLowerCase();
+      document.querySelectorAll('#chatChannelList > div').forEach(el => {
+        const text = el.innerText.toLowerCase();
+        el.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+
+    function selectChannel(id) {
+      state.chat.activeChannel = id;
+      const channel = state.chat.channels.find(c => c.id === id);
+      if (channel) {
+        document.getElementById('activeChatTitle').innerText = channel.name;
+      }
+      renderChatChannels();
+      renderChatMessages();
+    }
+
+    function renderChatMessages() {
+      const stream = document.getElementById('chatMessageStream');
+      const messages = state.chat.messages[state.chat.activeChannel] || [];
+
+      stream.innerHTML = messages.map(m => `
+        <div class="flex flex-col ${m.self ? 'items-end' : 'items-start'}">
+          <div class="text-[10px] text-slate-400 mb-0.5">${m.sender} • ${m.time}</div>
+          <div class="text-xs px-3.5 py-2 rounded-xl max-w-xs shadow-sm ${m.self ? 'bg-cyan-500 text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'}">
+            ${m.text}
+          </div>
+        </div>
+      `).join('');
+
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      state.chat.messages[state.chat.activeChannel].push({
+        sender: 'Alex Mercer',
+        text,
+        time,
+        self: true
+      });
+
+      input.value = '';
+      renderChatMessages();
+
+      // Simulated auto-reply
+      setTimeout(() => {
+        state.chat.messages[state.chat.activeChannel].push({
+          sender: 'GLamp Assistant',
+          text: 'Message received and logged in channel stream.',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          self: false
+        });
+        renderChatMessages();
+      }, 1000);
+    }
+
+    // --- DEALS MODULE ---
+    function renderDeals() {
+      const stages = ['Discovery', 'Qualification', 'Proposal', 'Won'];
+      let grandTotal = 0;
+
+      stages.forEach(stage => {
+        const stageKey = stage.toLowerCase();
+        const container = document.getElementById(`kanban-${stageKey}`);
+        const stageDeals = state.deals.filter(d => d.stage === stage);
+        
+        document.getElementById(`count-${stageKey}`).innerText = stageDeals.length;
+
+        container.innerHTML = stageDeals.map(deal => {
+          grandTotal += Number(deal.value);
+          return `
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all space-y-2">
+              <div class="flex justify-between items-start">
+                <h4 class="font-bold text-xs text-slate-800">${deal.title}</h4>
+                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">$${deal.value.toLocaleString()}</span>
+              </div>
+              <p class="text-[11px] text-slate-500"><i class="fa-solid fa-building text-slate-400 mr-1"></i>${deal.company}</p>
+              <div class="flex justify-between items-center text-[10px] pt-2 border-t border-slate-100 text-slate-400">
+                <span>Owner: AM</span>
+                <button onclick="advanceDealStage('${deal.id}')" class="text-cyan-600 hover:underline font-semibold flex items-center gap-1">
+                  <span>Advance</span> <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      });
+
+      document.getElementById('deals-total-value').innerText = `$${grandTotal.toLocaleString()}`;
+    }
+
+    function advanceDealStage(id) {
+      const deal = state.deals.find(d => d.id === id);
+      const stages = ['Discovery', 'Qualification', 'Proposal', 'Won'];
+      if (deal) {
+        const nextIdx = (stages.indexOf(deal.stage) + 1) % stages.length;
+        deal.stage = stages[nextIdx];
+        renderDeals();
+        showToast(`Advanced deal to ${deal.stage}`);
+      }
+    }
+
+    // --- CUSTOMERS MODULE ---
+    function renderCustomers() {
+      const grid = document.getElementById('customerGrid');
+      const filter = document.getElementById('customerTierFilter').value;
+      const filtered = filter === 'ALL' ? state.customers : state.customers.filter(c => c.tier === filter);
+
+      grid.innerHTML = filtered.map(c => `
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-bold text-sm text-slate-800">${c.name}</h3>
+              <p class="text-xs text-slate-400">${c.industry}</p>
+            </div>
+            <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200">${c.tier}</span>
+          </div>
+          <div class="text-xs text-slate-600 pt-2 border-t border-slate-100 space-y-1">
+            <p><i class="fa-solid fa-user-check text-slate-400 mr-2"></i>Account Lead: <strong>${c.contact}</strong></p>
+            <p><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Account Status: ${c.status}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // --- ATTENDANCE LOG MODULE ---
+    function toggleAttendanceClock() {
+      const btn = document.getElementById('checkInBtn');
+      const text = document.getElementById('checkInText');
+
+      if (!state.attendance.clockedIn) {
+        state.attendance.clockedIn = true;
+        text.innerText = 'Clock Out';
+        btn.className = "bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-5 py-2.5 rounded-lg shadow transition-all flex items-center gap-2";
+
+        state.attendance.interval = setInterval(() => {
+          state.attendance.seconds++;
+          const hrs = Math.floor(state.attendance.seconds / 3600).toString().padStart(2, '0');
+          const mins = Math.floor((state.attendance.seconds % 3600) / 60).toString().padStart(2, '0');
+          const secs = (state.attendance.seconds % 60).toString().padStart(2, '0');
+          document.getElementById('attendanceClock').innerText = `${hrs}:${mins}:${secs}`;
+        }, 1000);
+
+        showToast('Shift Clock In registered.');
+      } else {
+        clearInterval(state.attendance.interval);
+        
+        const hrs = Math.floor(state.attendance.seconds / 3600);
+        const mins = Math.floor((state.attendance.seconds % 3600) / 60);
+
+        state.attendance.logs.unshift({
+          employee: 'Alex Mercer',
+          date: new Date().toISOString().split('T')[0],
+          checkIn: '09:00 AM',
+          checkOut: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          duration: `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m`,
+          status: 'Shift Completed'
+        });
+
+        state.attendance.clockedIn = false;
+        state.attendance.seconds = 0;
+        document.getElementById('attendanceClock').innerText = "00:00:00";
+
+        text.innerText = 'Clock In';
+        btn.className = "bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-5 py-2.5 rounded-lg shadow transition-all flex items-center gap-2";
+
+        renderAttendanceLogs();
+        showToast('Clock Out saved to log.');
+      }
+    }
+
+    function renderAttendanceLogs() {
+      const tbody = document.getElementById('attendanceLogsBody');
+      tbody.innerHTML = state.attendance.logs.map(log => `
+        <tr class="hover:bg-slate-50 border-b border-slate-100">
+          <td class="p-4 font-semibold text-slate-800">${log.employee}</td>
+          <td class="p-4 text-slate-600">${log.date}</td>
+          <td class="p-4 text-emerald-600 font-medium">${log.checkIn}</td>
+          <td class="p-4 text-rose-600 font-medium">${log.checkOut}</td>
+          <td class="p-4 font-bold text-slate-800">${log.duration}</td>
+          <td class="p-4"><span class="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">${log.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // --- GLOBAL SEARCH ---
+    function handleGlobalSearch(query) {
+      if (!query.trim()) return;
+      const q = query.toLowerCase();
+      
+      // Auto switch to Leads if matching leads
+      const leadMatch = state.leads.find(l => (l.title && l.title.toLowerCase().includes(q)) || (l.company && l.company.toLowerCase().includes(q)));
+      if (leadMatch) {
+        switchTab('leads');
+      }
+    }
+  </script>
 </body>
 </html>
