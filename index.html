@@ -336,14 +336,7 @@
 
     <!-- JavaScript Data and Navigation Handlers -->
     <script>
-        // Initial Default Candidates Fallback
-        let candidatesList = [
-            { id: '1', name: 'Taylor Morgan', position: 'Staff Backend Architect', role: 'Staff Backend Architect', experience: '7 Years Exp', stage: 'Interview', email: 'taylor@example.com' },
-            { id: '2', name: 'Jordan Rivera', position: 'Lead Product Designer', role: 'Lead Product Designer', experience: '5 Years Exp', stage: 'Screening', email: 'jordan@example.com' },
-            { id: '3', name: 'Casey Vance', position: 'DevOps & Cloud Engineer', role: 'DevOps & Cloud Engineer', experience: '6 Years Exp', stage: 'Hired', email: 'casey@example.com' },
-            { id: '4', name: 'Avery Chen', position: 'Senior Frontend Developer', role: 'Senior Frontend Developer', experience: '4 Years Exp', stage: 'Interview', email: 'avery@example.com' }
-        ];
-
+        let candidatesList = [];
         let activeFilter = 'All';
 
         // Realtime Header Clock
@@ -443,26 +436,24 @@
             renderCandidates();
         }
 
-        // Fetch candidates directly from /api/candidates Supabase route
+        // Fetch candidates directly from Supabase via API
         async function fetchCandidates() {
             try {
                 const response = await fetch('/api/candidates');
                 if (response.ok) {
                     const data = await response.json();
-                    if (data && data.length > 0) {
-                        candidatesList = data.map(item => ({
-                            ...item,
-                            role: item.position || item.role || 'Software Engineer'
-                        }));
-                    }
+                    candidatesList = data.map(item => ({
+                        ...item,
+                        role: item.position || item.role || 'Software Engineer'
+                    }));
                 }
             } catch (e) {
-                console.log('Using fallback local candidates data');
+                console.error('Failed to load candidates:', e);
             }
             renderCandidates();
         }
 
-        // Submit new candidate form to Supabase API
+        // Save new candidate directly to Supabase via API
         async function handleCandidateSubmit(event) {
             event.preventDefault();
             const submitBtn = document.getElementById('cand-submit-btn');
@@ -482,34 +473,25 @@
             try {
                 const response = await fetch('/api/candidates', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': 'my_super_secret_crm_key_9876'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newCand)
                 });
 
                 if (response.ok) {
                     const saved = await response.json();
-                    candidatesList.unshift({
-                        ...saved,
-                        role: saved.position || saved.role || newCand.position
-                    });
+                    candidatesList.unshift(saved);
+                    closeCandidateModal();
+                    renderCandidates();
                 } else {
-                    newCand.id = Date.now().toString();
-                    candidatesList.unshift(newCand);
+                    const errData = await response.json();
+                    alert('Failed to save candidate: ' + (errData.error || response.statusText));
                 }
             } catch (err) {
-                console.error(err);
-                newCand.id = Date.now().toString();
-                candidatesList.unshift(newCand);
+                alert('Network error: ' + err.message);
+            } finally {
+                submitBtn.innerText = 'Save Candidate';
+                submitBtn.disabled = false;
             }
-
-            submitBtn.innerText = 'Save Candidate';
-            submitBtn.disabled = false;
-
-            closeCandidateModal();
-            renderCandidates();
         }
 
         // Leads Handlers
@@ -552,7 +534,7 @@
             try {
                 await fetch('/api/leads', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-api-key': 'my_super_secret_crm_key_9876' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newLead)
                 });
                 document.getElementById('leadForm').reset();
@@ -591,7 +573,7 @@
             try {
                 await fetch('/api/attendance', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-api-key': 'my_super_secret_crm_key_9876' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(entry)
                 });
                 fetchAttendance();
@@ -601,7 +583,6 @@
         }
 
         // Initial Load
-        renderCandidates();
         fetchCandidates();
     </script>
 </body>

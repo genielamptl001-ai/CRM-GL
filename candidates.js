@@ -8,7 +8,7 @@ const supabase = createClient(
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -26,16 +26,10 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const clientApiKey = req.headers['x-api-key'];
-
-      if (!clientApiKey || clientApiKey !== process.env.CRM_API_KEY) {
-        return res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
-      }
-
       const { name, email, phone, position, role, stage, experience } = req.body;
 
       const payload = {
-        name: name || 'Unnamed',
+        name: name || 'Unnamed Candidate',
         email: email || '',
         phone: phone || '',
         position: position || role || 'Software Engineer',
@@ -58,7 +52,6 @@ export default async function handler(req, res) {
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (err) {
-    console.error('Server Error:', err.message);
     return res.status(500).json({ error: err.message });
   }
 }
