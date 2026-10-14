@@ -6,29 +6,95 @@
     <title>Streamline CRM</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen flex flex-col">
 
-    <div class="max-w-6xl mx-auto p-6">
-        <!-- Header & Navigation -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-sm gap-4">
-            <h1 class="text-2xl font-bold text-gray-800">Streamline CRM</h1>
-            
-            <!-- Page Navigation Tabs -->
-            <nav class="flex space-x-2 bg-gray-100 p-1 rounded-lg">
-                <button onclick="switchPage('leads')" id="nav-leads" class="px-4 py-2 text-sm font-medium rounded-md transition bg-white text-blue-600 shadow-sm">Leads Dashboard</button>
-                <button onclick="switchPage('add')" id="nav-add" class="px-4 py-2 text-sm font-medium rounded-md transition text-gray-600 hover:text-gray-900">Add New Lead</button>
-            </nav>
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b px-6 py-4 flex flex-wrap justify-between items-center shadow-sm">
+        <h1 class="text-xl font-bold text-gray-800">Streamline CRM</h1>
+        <nav class="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-lg text-sm font-medium">
+            <button onclick="switchPage('candidates')" id="nav-candidates" class="px-3 py-1.5 rounded-md transition bg-white text-blue-600 shadow-sm">Candidates</button>
+            <button onclick="switchPage('messages')" id="nav-messages" class="px-3 py-1.5 rounded-md transition text-gray-600 hover:text-gray-900">Messages</button>
+            <button onclick="switchPage('leads')" id="nav-leads" class="px-3 py-1.5 rounded-md transition text-gray-600 hover:text-gray-900">Leads</button>
+            <button onclick="switchPage('deals')" id="nav-deals" class="px-3 py-1.5 rounded-md transition text-gray-600 hover:text-gray-900">Deals</button>
+            <button onclick="switchPage('customers')" id="nav-customers" class="px-3 py-1.5 rounded-md transition text-gray-600 hover:text-gray-900">Customers</button>
+            <button onclick="switchPage('attendance')" id="nav-attendance" class="px-3 py-1.5 rounded-md transition text-gray-600 hover:text-gray-900">Attendance</button>
+        </nav>
+        <span class="text-xs bg-green-100 text-green-700 font-semibold px-3 py-1 rounded-full">Secure API Live</span>
+    </header>
 
-            <span class="text-xs bg-green-100 text-green-700 font-semibold px-3 py-1 rounded-full">Secured via Vercel API</span>
-        </header>
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto p-6 w-full flex-grow">
 
-        <!-- PAGE 1: LEADS DASHBOARD -->
-        <div id="page-leads" class="space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm overflow-x-auto">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-gray-700">All Leads Database</h2>
-                    <button onclick="fetchLeads()" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">🔄 Refresh</button>
+        <!-- 1. CANDIDATES PAGE -->
+        <div id="page-candidates" class="space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Candidates Management</h2>
+                <button onclick="alert('Open Add Candidate Form')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Add Candidate</button>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                <p class="text-gray-500 text-sm">Manage candidate profiles, resumes, and interview stages here.</p>
+            </div>
+        </div>
+
+        <!-- 2. MESSAGES / CHATS PAGE -->
+        <div id="page-messages" class="hidden space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800">Messages & Chats</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 bg-white rounded-xl shadow-sm border h-[600px] overflow-hidden">
+                <div class="border-r p-4 bg-gray-50 overflow-y-auto">
+                    <h3 class="font-semibold text-gray-700 mb-3">Conversations</h3>
+                    <div class="space-y-2">
+                        <div class="p-3 bg-white rounded-lg border shadow-sm cursor-pointer">
+                            <p class="font-medium text-sm text-gray-800">Rahul Sharma</p>
+                            <p class="text-xs text-gray-500 truncate">Hey, following up on the proposal...</p>
+                        </div>
+                    </div>
                 </div>
+                <div class="md:col-span-2 flex flex-col justify-between p-4">
+                    <div class="border-b pb-3 font-medium text-gray-700">Chat with Rahul Sharma</div>
+                    <div class="flex-grow py-4 overflow-y-auto space-y-3">
+                        <div class="bg-gray-100 p-3 rounded-lg max-w-md text-sm text-gray-700">Hey, following up on the proposal sent yesterday.</div>
+                    </div>
+                    <div class="flex gap-2 pt-2 border-t">
+                        <input type="text" placeholder="Type a message..." class="flex-grow border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. LEADS PAGE (Connected to Serverless API) -->
+        <div id="page-leads" class="hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Leads Pipeline</h2>
+                <button onclick="fetchLeads()" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">🔄 Refresh Leads</button>
+            </div>
+
+            <!-- Add Lead Form Inline -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                <h3 class="text-lg font-semibold mb-4 text-gray-700">Add New Lead</h3>
+                <form id="leadForm" onsubmit="handleLeadSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Name</label>
+                        <input type="text" id="lead-name" required class="w-full border rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Email</label>
+                        <input type="email" id="lead-email" class="w-full border rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Phone</label>
+                        <input type="text" id="lead-phone" class="w-full border rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Value (₹)</label>
+                        <input type="number" id="lead-value" value="0" class="w-full border rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <button type="submit" class="bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 text-sm h-[38px]">Save Lead</button>
+                </form>
+            </div>
+
+            <!-- Leads Table -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b text-sm text-gray-500">
@@ -40,61 +106,67 @@
                         </tr>
                     </thead>
                     <tbody id="leadsTableBody" class="text-sm text-gray-700">
-                        <tr>
-                            <td colspan="5" class="text-center py-4 text-gray-400">Loading leads...</td>
-                        </tr>
+                        <tr><td colspan="5" class="text-center py-4 text-gray-400">Loading leads...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- PAGE 2: ADD NEW LEAD FORM -->
-        <div id="page-add" class="hidden max-w-xl mx-auto">
-            <div class="bg-white p-8 rounded-xl shadow-sm">
-                <h2 class="text-xl font-semibold mb-6 text-gray-800">Add a New Lead</h2>
-                <form id="leadForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
-                        <input type="text" id="name" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <!-- 4. DEALS PAGE -->
+        <div id="page-deals" class="hidden space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800">Deals Management</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-4 rounded-xl shadow-sm border">
+                    <h3 class="font-semibold text-gray-700 mb-3 border-b pb-2">Qualified</h3>
+                    <div class="p-3 bg-gray-50 rounded-lg border text-sm space-y-1">
+                        <p class="font-medium text-gray-800">Enterprise Software Deal</p>
+                        <p class="text-xs text-gray-500">Value: ₹1,50,000</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Email Address</label>
-                        <input type="email" id="email" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Phone Number</label>
-                        <input type="text" id="phone" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Estimated Value (₹)</label>
-                        <input type="number" id="value" value="0" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-medium py-2.5 rounded-lg hover:bg-blue-700 transition">Save Lead to Database</button>
-                </form>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border">
+                    <h3 class="font-semibold text-gray-700 mb-3 border-b pb-2">Proposal Sent</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border">
+                    <h3 class="font-semibold text-gray-700 mb-3 border-b pb-2">Closed Won</h3>
+                </div>
             </div>
         </div>
 
-    </div>
+        <!-- 5. CUSTOMERS PAGE -->
+        <div id="page-customers" class="hidden space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800">Customers Directory</h2>
+            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                <p class="text-gray-500 text-sm">Converted customers list will appear here.</p>
+            </div>
+        </div>
 
-    <!-- JavaScript Navigation & API Handling -->
+        <!-- 6. ATTENDANCE PAGE -->
+        <div id="page-attendance" class="hidden space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800">Staff Attendance</h2>
+            <div class="bg-white p-6 rounded-xl shadow-sm border flex justify-between items-center">
+                <div>
+                    <p class="font-semibold text-gray-800">Today's Check-in Status</p>
+                    <p class="text-xs text-gray-500">Mark your daily attendance status.</p>
+                </div>
+                <button onclick="alert('Checked in successfully!')" class="bg-green-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-green-700">Check In Now</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Navigation and API Script -->
     <script>
-        function switchPage(page) {
-            const leadsPage = document.getElementById('page-leads');
-            const addPage = document.getElementById('page-add');
-            const navLeads = document.getElementById('nav-leads');
-            const navAdd = document.getElementById('nav-add');
+        function switchPage(pageId) {
+            const pages = ['candidates', 'messages', 'leads', 'deals', 'customers', 'attendance'];
+            pages.forEach(p => {
+                document.getElementById(`page-${p}`).classList.add('hidden');
+                document.getElementById(`nav-${p}`).className = "px-3 py-1.5 rounded-md transition text-gray-600 hover:text-gray-900";
+            });
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            document.getElementById(`nav-${pageId}`).className = "px-3 py-1.5 rounded-md transition bg-white text-blue-600 shadow-sm";
 
-            if (page === 'leads') {
-                leadsPage.classList.remove('hidden');
-                addPage.classList.add('hidden');
-                navLeads.className = "px-4 py-2 text-sm font-medium rounded-md transition bg-white text-blue-600 shadow-sm";
-                navAdd.className = "px-4 py-2 text-sm font-medium rounded-md transition text-gray-600 hover:text-gray-900";
+            if (pageId === 'leads') {
                 fetchLeads();
-            } else {
-                leadsPage.classList.add('hidden');
-                addPage.classList.remove('hidden');
-                navAdd.className = "px-4 py-2 text-sm font-medium rounded-md transition bg-white text-blue-600 shadow-sm";
-                navLeads.className = "px-4 py-2 text-sm font-medium rounded-md transition text-gray-600 hover:text-gray-900";
             }
         }
 
@@ -102,10 +174,10 @@
             try {
                 const response = await fetch('/api/leads');
                 const leads = await response.json();
-                
                 const tbody = document.getElementById('leadsTableBody');
+                
                 if (!leads || leads.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">No leads found. Add your first lead!</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">No leads found.</td></tr>`;
                     return;
                 }
 
@@ -123,14 +195,13 @@
             }
         }
 
-        async function handleFormSubmit(event) {
+        async function handleLeadSubmit(event) {
             event.preventDefault();
-            
             const newLead = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                value: parseFloat(document.getElementById('value').value) || 0,
+                name: document.getElementById('lead-name').value,
+                email: document.getElementById('lead-email').value,
+                phone: document.getElementById('lead-phone').value,
+                value: parseFloat(document.getElementById('lead-value').value) || 0,
                 status: 'New'
             };
 
@@ -146,18 +217,14 @@
 
                 if (response.ok) {
                     document.getElementById('leadForm').reset();
-                    alert('Lead saved successfully!');
-                    switchPage('leads'); // Return to dashboard automatically
+                    fetchLeads();
                 } else {
-                    alert('Unauthorized or failed to save lead');
+                    alert('Failed to save lead');
                 }
             } catch (err) {
                 console.error('Error saving lead:', err);
             }
         }
-
-        // Initial load
-        fetchLeads();
     </script>
 </body>
 </html>
