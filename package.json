@@ -1,7 +1,8 @@
 {
-  "name": "crm-backend",
+  "name": "crm-gl",
   "version": "1.0.0",
+  "description": "GLamp Enterprise CRM",
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.39.8"
   }
 }
