@@ -19,30 +19,46 @@ export default async function handler(req, res) {
       const { data, error } = await supabase
         .from('candidates')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('id', { ascending: false });
 
       if (error) throw error;
-      return res.status(200).json(data);
+      return res.status(200).json(data || []);
     }
 
     if (req.method === 'POST') {
       const clientApiKey = req.headers['x-api-key'];
 
       if (!clientApiKey || clientApiKey !== process.env.CRM_API_KEY) {
-        return res.status(401).json({ error: 'Unauthorized: Invalid or missing API Key' });
+        return res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
       }
+
+      const { name, email, phone, position, role, stage, experience } = req.body;
+
+      const payload = {
+        name: name || 'Unnamed',
+        email: email || '',
+        phone: phone || '',
+        position: position || role || 'Software Engineer',
+        experience: experience || '0 Years Exp',
+        stage: stage || 'Screening'
+      };
 
       const { data, error } = await supabase
         .from('candidates')
-        .insert([req.body])
+        .insert([payload])
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase Error:', error);
+        return res.status(400).json({ error: error.message });
+      }
+
       return res.status(200).json(data[0]);
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (err) {
+    console.error('Server Error:', err.message);
     return res.status(500).json({ error: err.message });
   }
 }
