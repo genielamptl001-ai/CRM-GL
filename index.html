@@ -101,21 +101,21 @@
             <section id="view-candidates" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar">
                 <div class="max-w-7xl mx-auto space-y-6">
                     
-                    <!-- Candidates Header with ADD BUTTON -->
+                    <!-- Candidates Header with ADD CANDIDATE BUTTON -->
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <h2 class="text-xl font-bold text-gray-800">Candidates Talent Pool</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Recruitment stages, applicant evaluation, and live Supabase records</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Recruitment stages, applicant evaluation, and live Supabase database records</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="flex bg-gray-100 p-1 rounded-lg text-xs font-medium text-gray-600">
-                                <button onclick="filterCandidates('All')" class="px-3 py-1.5 rounded-md bg-white text-gray-900 shadow-sm">All</button>
-                                <button onclick="filterCandidates('Screening')" class="px-3 py-1.5 rounded-md hover:text-gray-900">Screening</button>
-                                <button onclick="filterCandidates('Interview')" class="px-3 py-1.5 rounded-md hover:text-gray-900">Interview</button>
-                                <button onclick="filterCandidates('Hired')" class="px-3 py-1.5 rounded-md hover:text-gray-900">Hired</button>
+                                <button onclick="filterCandidates('All')" id="filter-All" class="px-3 py-1.5 rounded-md bg-white text-gray-900 shadow-sm font-semibold">All</button>
+                                <button onclick="filterCandidates('Screening')" id="filter-Screening" class="px-3 py-1.5 rounded-md hover:text-gray-900">Screening</button>
+                                <button onclick="filterCandidates('Interview')" id="filter-Interview" class="px-3 py-1.5 rounded-md hover:text-gray-900">Interview</button>
+                                <button onclick="filterCandidates('Hired')" id="filter-Hired" class="px-3 py-1.5 rounded-md hover:text-gray-900">Hired</button>
                             </div>
                             
-                            <!-- HERE IS THE ADD CANDIDATE BUTTON -->
+                            <!-- ADD CANDIDATE BUTTON -->
                             <button onclick="openCandidateModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
                                 <span>+</span> Add Candidate
                             </button>
@@ -124,7 +124,7 @@
 
                     <!-- Candidates Grid -->
                     <div id="candidatesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Cards injected via JavaScript -->
+                        <div class="col-span-full text-center py-8 text-gray-400 text-xs">Loading candidates from Supabase...</div>
                     </div>
                 </div>
             </section>
@@ -172,7 +172,6 @@
             <!-- MODULE 3: LEADS -->
             <section id="view-leads" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden">
                 <div class="max-w-7xl mx-auto space-y-6">
-                    <!-- Add Lead Form -->
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200/80">
                         <div class="flex justify-between items-center mb-4">
                             <div>
@@ -201,7 +200,6 @@
                         </form>
                     </div>
 
-                    <!-- Leads Table -->
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200/80 overflow-x-auto">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-base font-bold text-gray-800">Leads Database</h3>
@@ -294,27 +292,35 @@
 
     <!-- 3. ADD CANDIDATE MODAL -->
     <div id="candidateModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-xl shadow-xl border max-w-md w-full p-6 space-y-4">
+        <div class="bg-white rounded-xl shadow-xl border border-gray-200 max-w-md w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="text-base font-bold text-gray-800">Add New Candidate</h3>
-                <button onclick="closeCandidateModal()" class="text-gray-400 hover:text-gray-600 font-bold">✕</button>
+                <button onclick="closeCandidateModal()" class="text-gray-400 hover:text-gray-600 font-bold text-sm">✕</button>
             </div>
             <form id="candidateForm" onsubmit="handleCandidateSubmit(event)" class="space-y-3">
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Full Name</label>
-                    <input type="text" id="cand-name" required placeholder="e.g. Jordan Rivera" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="cand-name" required placeholder="e.g. Jordan Rivera" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Role / Job Title</label>
-                    <input type="text" id="cand-role" required placeholder="e.g. Senior Frontend Developer" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Email</label>
+                    <input type="email" id="cand-email" placeholder="jordan@example.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Phone</label>
+                    <input type="text" id="cand-phone" placeholder="+1 234 567 890" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Role / Position</label>
+                    <input type="text" id="cand-role" required placeholder="e.g. Lead Product Designer" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Experience</label>
-                    <input type="text" id="cand-exp" placeholder="e.g. 5 Years Exp" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="cand-exp" placeholder="e.g. 5 Years Exp" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Stage</label>
-                    <select id="cand-stage" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500">
+                    <select id="cand-stage" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                         <option value="Screening">Screening</option>
                         <option value="Interview">Interview</option>
                         <option value="Hired">Hired</option>
@@ -322,30 +328,30 @@
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t">
                     <button type="button" onclick="closeCandidateModal()" class="px-4 py-2 border rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm">Save Candidate</button>
+                    <button type="submit" id="cand-submit-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">Save Candidate</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- JavaScript Navigation & Data Logic -->
+    <!-- JavaScript Data and Navigation Handlers -->
     <script>
-        // Default Candidates Initial State
+        // Initial Default Candidates Fallback
         let candidatesList = [
-            { id: '1', name: 'Taylor Morgan', role: 'Staff Backend Architect', experience: '7 Years Exp', stage: 'Interview' },
-            { id: '2', name: 'Jordan Rivera', role: 'Lead Product Designer', experience: '5 Years Exp', stage: 'Screening' },
-            { id: '3', name: 'Casey Vance', role: 'DevOps & Cloud Engineer', experience: '6 Years Exp', stage: 'Hired' },
-            { id: '4', name: 'Avery Chen', role: 'Senior Frontend Developer', experience: '4 Years Exp', stage: 'Interview' }
+            { id: '1', name: 'Taylor Morgan', position: 'Staff Backend Architect', role: 'Staff Backend Architect', experience: '7 Years Exp', stage: 'Interview', email: 'taylor@example.com' },
+            { id: '2', name: 'Jordan Rivera', position: 'Lead Product Designer', role: 'Lead Product Designer', experience: '5 Years Exp', stage: 'Screening', email: 'jordan@example.com' },
+            { id: '3', name: 'Casey Vance', position: 'DevOps & Cloud Engineer', role: 'DevOps & Cloud Engineer', experience: '6 Years Exp', stage: 'Hired', email: 'casey@example.com' },
+            { id: '4', name: 'Avery Chen', position: 'Senior Frontend Developer', role: 'Senior Frontend Developer', experience: '4 Years Exp', stage: 'Interview', email: 'avery@example.com' }
         ];
 
         let activeFilter = 'All';
 
-        // Realtime Clock Header
+        // Realtime Header Clock
         setInterval(() => {
             document.getElementById('header-clock').innerText = new Date().toLocaleTimeString();
         }, 1000);
 
-        // Switch Core Modules
+        // Core Module Navigation Switcher
         function switchTab(tabId) {
             const tabs = ['candidates', 'messages', 'leads', 'deals', 'customers', 'attendance'];
             tabs.forEach(t => {
@@ -371,7 +377,7 @@
             if (tabId === 'candidates') fetchCandidates();
         }
 
-        // Candidates Modal Logic
+        // Candidates UI Modal Handlers
         function openCandidateModal() {
             document.getElementById('candidateModal').classList.remove('hidden');
         }
@@ -383,6 +389,14 @@
 
         function filterCandidates(filter) {
             activeFilter = filter;
+            ['All', 'Screening', 'Interview', 'Hired'].forEach(f => {
+                const btn = document.getElementById(`filter-${f}`);
+                if (btn) {
+                    btn.className = f === filter 
+                        ? 'px-3 py-1.5 rounded-md bg-white text-gray-900 shadow-sm font-semibold' 
+                        : 'px-3 py-1.5 rounded-md hover:text-gray-900 text-gray-600';
+                }
+            });
             renderCandidates();
         }
 
@@ -392,8 +406,8 @@
                 ? candidatesList 
                 : candidatesList.filter(c => c.stage === activeFilter);
 
-            if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full bg-white p-8 rounded-xl border text-center text-gray-400 text-xs">No candidates found under '${activeFilter}' stage.</div>`;
+            if (!filtered || filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full bg-white p-8 rounded-xl border border-gray-200/80 text-center text-gray-400 text-xs">No candidates found under '${activeFilter}' stage.</div>`;
                 return;
             }
 
@@ -404,16 +418,17 @@
             };
 
             grid.innerHTML = filtered.map(c => `
-                <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-3">
+                <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-3 hover:shadow-md transition">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h4 class="font-bold text-gray-900 text-sm">${c.name}</h4>
-                            <p class="text-xs text-blue-600 font-medium">${c.role}</p>
+                            <h4 class="font-bold text-gray-900 text-sm">${c.name || 'Unnamed'}</h4>
+                            <p class="text-xs text-blue-600 font-medium mt-0.5">${c.position || c.role || 'Position Unspecified'}</p>
+                            ${c.email ? `<p class="text-[11px] text-gray-400 mt-0.5">${c.email}</p>` : ''}
                         </div>
-                        <span class="text-[10px] font-semibold px-2.5 py-1 rounded-md border ${stageColors[c.stage] || 'bg-gray-100 text-gray-600'}">${c.stage}</span>
+                        <span class="text-[10px] font-semibold px-2.5 py-1 rounded-md border ${stageColors[c.stage] || 'bg-gray-100 text-gray-600'}">${c.stage || 'Screening'}</span>
                     </div>
                     <div class="flex justify-between items-center text-xs text-gray-500 pt-2 border-t border-gray-100">
-                        <span>💼 ${c.experience || 'N/A'}</span>
+                        <span>💼 ${c.experience || '0 Years Exp'}</span>
                         <button onclick="advanceCandidateStage('${c.id}')" class="text-xs text-blue-600 hover:text-blue-800 font-semibold">Advance Stage →</button>
                     </div>
                 </div>
@@ -428,23 +443,37 @@
             renderCandidates();
         }
 
+        // Fetch candidates directly from /api/candidates Supabase route
         async function fetchCandidates() {
             try {
                 const response = await fetch('/api/candidates');
                 if (response.ok) {
                     const data = await response.json();
-                    if (data && data.length > 0) candidatesList = data;
+                    if (data && data.length > 0) {
+                        candidatesList = data.map(item => ({
+                            ...item,
+                            role: item.position || item.role || 'Software Engineer'
+                        }));
+                    }
                 }
             } catch (e) {
-                console.log('Using local candidates data');
+                console.log('Using fallback local candidates data');
             }
             renderCandidates();
         }
 
+        // Submit new candidate form to Supabase API
         async function handleCandidateSubmit(event) {
             event.preventDefault();
+            const submitBtn = document.getElementById('cand-submit-btn');
+            submitBtn.innerText = 'Saving...';
+            submitBtn.disabled = true;
+
             const newCand = {
                 name: document.getElementById('cand-name').value,
+                email: document.getElementById('cand-email').value,
+                phone: document.getElementById('cand-phone').value,
+                position: document.getElementById('cand-role').value,
                 role: document.getElementById('cand-role').value,
                 experience: document.getElementById('cand-exp').value || '0 Years Exp',
                 stage: document.getElementById('cand-stage').value
@@ -462,15 +491,22 @@
 
                 if (response.ok) {
                     const saved = await response.json();
-                    candidatesList.unshift(saved);
+                    candidatesList.unshift({
+                        ...saved,
+                        role: saved.position || saved.role || newCand.position
+                    });
                 } else {
                     newCand.id = Date.now().toString();
                     candidatesList.unshift(newCand);
                 }
             } catch (err) {
+                console.error(err);
                 newCand.id = Date.now().toString();
                 candidatesList.unshift(newCand);
             }
+
+            submitBtn.innerText = 'Save Candidate';
+            submitBtn.disabled = false;
 
             closeCandidateModal();
             renderCandidates();
