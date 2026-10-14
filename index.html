@@ -3,779 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streamline CRM - Candidate & Team Management</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Streamline CRM</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen">
 
-    <!-- Top Navigation Bar -->
-    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-indigo-600 p-2 rounded-lg text-white font-bold text-lg flex items-center justify-center w-10 h-10 shadow-inner">
-                    <i class="fa-solid fa-cube"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg tracking-tight leading-none">StreamlineCRM</h1>
-                    <span class="text-xs text-indigo-400 font-medium">Candidates • Check-ins • Attendance • Tasks</span>
-                </div>
+    <div class="max-w-6xl mx-auto p-6">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-sm">
+            <h1 class="text-2xl font-bold text-gray-800">Streamline CRM</h1>
+            <span class="text-xs bg-green-100 text-green-700 font-semibold px-3 py-1 rounded-full">Connected to Vercel API</span>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- Add Lead Form -->
+            <div class="bg-white p-6 rounded-xl shadow-sm md:col-span-1 h-fit">
+                <h2 class="text-lg font-semibold mb-4 text-gray-700">Add New Lead</h2>
+                <form id="leadForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Name</label>
+                        <input type="text" id="name" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                        <input type="email" id="email" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Phone</label>
+                        <input type="text" id="phone" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Value (₹)</label>
+                        <input type="number" id="value" value="0" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition">Save Lead</button>
+                </form>
             </div>
 
-            <!-- Header Actions -->
-            <div class="flex items-center space-x-3">
-                <span id="connectionBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                    <span class="w-2 h-2 mr-1.5 bg-amber-500 rounded-full animate-pulse"></span> Local Mode
-                </span>
-                <button onclick="openSupabaseModal()" class="inline-flex items-center px-3 py-1.5 border border-slate-700 text-xs font-medium rounded-md text-slate-200 bg-slate-800 hover:bg-slate-700 transition">
-                    <i class="fa-solid fa-database mr-1.5 text-indigo-400"></i> Configure Supabase
-                </button>
-                <button onclick="openDeployModal()" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition">
-                    <i class="fa-solid fa-rocket mr-1.5"></i> Vercel Guide
-                </button>
+            <!-- Leads List Table -->
+            <div class="bg-white p-6 rounded-xl shadow-sm md:col-span-2 overflow-x-auto">
+                <h2 class="text-lg font-semibold mb-4 text-gray-700">Leads Database</h2>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b text-sm text-gray-500">
+                            <th class="py-2 px-3">Name</th>
+                            <th class="py-2 px-3">Email</th>
+                            <th class="py-2 px-3">Phone</th>
+                            <th class="py-2 px-3">Value</th>
+                            <th class="py-2 px-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTableBody" class="text-sm text-gray-700">
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-gray-400">Loading leads...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
-    </header>
 
-    <!-- Main Content Layout -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full flex flex-col md:flex-row gap-6">
-        
-        <!-- Sidebar Navigation -->
-        <aside class="w-full md:w-64 shrink-0">
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-1 sticky top-24">
-                <button onclick="switchTab('candidates')" id="nav-candidates" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition text-indigo-600 bg-indigo-50">
-                    <i class="fa-solid fa-users w-5 text-center"></i>
-                    <span>Candidate Details</span>
-                </button>
-                <button onclick="switchTab('chats')" id="nav-chats" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-                    <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i>
-                    <span>Check-ins / Logs</span>
-                </button>
-                <button onclick="switchTab('attendance')" id="nav-attendance" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-                    <i class="fa-solid fa-calendar-check w-5 text-center"></i>
-                    <span>Attendance Tracker</span>
-                </button>
-                <button onclick="switchTab('tasks')" id="nav-tasks" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-                    <i class="fa-solid fa-list-check w-5 text-center"></i>
-                    <span>Tasks & Board</span>
-                </button>
-                
-                <div class="pt-4 mt-4 border-t border-slate-100 px-3">
-                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Quick Stats</div>
-                    <div class="space-y-2 text-xs text-slate-600">
-                        <div class="flex justify-between"><span>Total Candidates:</span> <span id="statCandidates" class="font-bold text-slate-800">0</span></div>
-                        <div class="flex justify-between"><span>Active Check-ins:</span> <span id="statCheckins" class="font-bold text-slate-800">0</span></div>
-                        <div class="flex justify-between"><span>Open Tasks:</span> <span id="statTasks" class="font-bold text-slate-800">0</span></div>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Dynamic Tab Panels -->
-        <main class="flex-1 min-w-0">
-
-            <!-- 1. CANDIDATES TAB -->
-            <section id="tab-candidates" class="tab-content active space-y-6">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-800">Candidate Directory</h2>
-                        <p class="text-xs text-slate-500">Manage candidate profiles, contacts, and hiring status.</p>
-                    </div>
-                    <button onclick="openCandidateModal()" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition">
-                        <i class="fa-solid fa-user-plus mr-2"></i> Add Candidate
-                    </button>
-                </div>
-
-                <!-- Filters & Search -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-3 justify-between items-center">
-                    <div class="relative w-full sm:w-80">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-search"></i></span>
-                        <input type="text" id="searchCandidates" oninput="renderCandidates()" placeholder="Search candidates by name or email..." class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div class="flex items-center space-x-2 w-full sm:w-auto">
-                        <label class="text-xs font-medium text-slate-500">Status:</label>
-                        <select id="filterCandidateStatus" onchange="renderCandidates()" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                            <option value="">All Statuses</option>
-                            <option value="Applied">Applied</option>
-                            <option value="Interviewing">Interviewing</option>
-                            <option value="Hired">Hired</option>
-                            <option value="Rejected">Rejected</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Candidates Table Grid -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-slate-200">
-                            <thead class="bg-slate-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Candidate</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Contact</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Position / Skills</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="candidatesTableBody" class="divide-y divide-slate-200 bg-white text-sm">
-                                <!-- Dynamic rows -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div id="noCandidates" class="hidden text-center py-12 text-slate-400 text-sm">No candidates found. Click "Add Candidate" to begin.</div>
-                </div>
-            </section>
-
-            <!-- 2. CHATS / CHECK-IN CHECK-OUT TAB -->
-            <section id="tab-chats" class="tab-content space-y-6">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-800">Check-In / Check-Out Logs</h2>
-                        <p class="text-xs text-slate-500">Monitor candidate attendance check-ins, check-outs, and live interaction logs.</p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="performCheckIn()" class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow-sm transition">
-                            <i class="fa-solid fa-right-to-bracket mr-2"></i> Check-In Now
-                        </button>
-                        <button onclick="performCheckOut()" class="inline-flex items-center px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium rounded-lg shadow-sm transition">
-                            <i class="fa-solid fa-right-from-bracket mr-2"></i> Check-Out
-                        </button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 md:col-span-1 space-y-4">
-                        <h3 class="font-semibold text-sm text-slate-800 border-b pb-2">Log Activity / Note</h3>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Select Candidate / Staff</label>
-                            <select id="logCandidateSelect" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
-                                <!-- Populated dynamically -->
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Activity Type</label>
-                            <select id="logType" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
-                                <option value="Check-In">Check-In</option>
-                                <option value="Check-Out">Check-Out</option>
-                                <option value="Chat Note">Chat / Discussion Note</option>
-                                <option value="Interview Update">Interview Update</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Message / Details</label>
-                            <textarea id="logMessage" rows="3" placeholder="Type check-in remarks or notes here..." class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500"></textarea>
-                        </div>
-                        <button onclick="addLogEntry()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition">
-                            Save Log Entry
-                        </button>
-                    </div>
-
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 md:col-span-2 flex flex-col">
-                        <div class="flex justify-between items-center border-b pb-3 mb-4">
-                            <h3 class="font-semibold text-sm text-slate-800">Recent Logs & Check-ins Stream</h3>
-                            <span id="logCountBadge" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">0 entries</span>
-                        </div>
-                        <div id="logsFeed" class="space-y-3 overflow-y-auto max-h-[450px] pr-1 flex-1">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. ATTENDANCE TAB -->
-            <section id="tab-attendance" class="tab-content space-y-6">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-800">Attendance Tracker</h2>
-                        <p class="text-xs text-slate-500">Record and review daily attendance for candidates & interns.</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <input type="date" id="attendanceDate" onchange="renderAttendance()" class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
-                        <button onclick="markAllAttendance('Present')" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-semibold transition">Mark All Present</button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-slate-200">
-                            <thead class="bg-slate-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Candidate Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
-                                    <th class="px-6 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Quick Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="attendanceTableBody" class="divide-y divide-slate-200 bg-white text-sm">
-                                <!-- Populated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 4. TASKS TAB -->
-            <section id="tab-tasks" class="tab-content space-y-6">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-800">Task Management Board</h2>
-                        <p class="text-xs text-slate-500">Track tasks assigned across onboarding, interviews, and reviews.</p>
-                    </div>
-                    <button onclick="openTaskModal()" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition">
-                        <i class="fa-solid fa-plus mr-2"></i> Create Task
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-slate-100 rounded-xl p-4 flex flex-col border border-slate-200">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-bold text-sm text-slate-700 flex items-center"><span class="w-2.5 h-2.5 bg-amber-500 rounded-full mr-2"></span> To Do</h3>
-                            <span id="count-todo" class="text-xs font-semibold bg-white px-2 py-0.5 rounded-full text-slate-600 border border-slate-200">0</span>
-                        </div>
-                        <div id="col-todo" class="space-y-3 flex-1 min-h-[250px]"></div>
-                    </div>
-
-                    <div class="bg-slate-100 rounded-xl p-4 flex flex-col border border-slate-200">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-bold text-sm text-slate-700 flex items-center"><span class="w-2.5 h-2.5 bg-indigo-500 rounded-full mr-2"></span> In Progress</h3>
-                            <span id="count-inprogress" class="text-xs font-semibold bg-white px-2 py-0.5 rounded-full text-slate-600 border border-slate-200">0</span>
-                        </div>
-                        <div id="col-inprogress" class="space-y-3 flex-1 min-h-[250px]"></div>
-                    </div>
-
-                    <div class="bg-slate-100 rounded-xl p-4 flex flex-col border border-slate-200">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-bold text-sm text-slate-700 flex items-center"><span class="w-2.5 h-2.5 bg-emerald-500 rounded-full mr-2"></span> Done</h3>
-                            <span id="count-done" class="text-xs font-semibold bg-white px-2 py-0.5 rounded-full text-slate-600 border border-slate-200">0</span>
-                        </div>
-                        <div id="col-done" class="space-y-3 flex-1 min-h-[250px]"></div>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- MODALS -->
-    <div id="candidateModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
-            <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-                <h3 id="candidateModalTitle" class="font-bold text-slate-800 text-base">Add Candidate</h3>
-                <button onclick="closeCandidateModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form id="candidateForm" onsubmit="saveCandidate(event)" class="p-6 space-y-4">
-                <input type="hidden" id="candidateId">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Full Name *</label>
-                    <input type="text" id="candName" required class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Email Address *</label>
-                    <input type="email" id="candEmail" required class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Phone</label>
-                        <input type="text" id="candPhone" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Status</label>
-                        <select id="candStatus" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
-                            <option value="Applied">Applied</option>
-                            <option value="Interviewing">Interviewing</option>
-                            <option value="Hired">Hired</option>
-                            <option value="Rejected">Rejected</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Position / Role</label>
-                    <input type="text" id="candPosition" placeholder="e.g. Frontend Engineer" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div class="pt-3 flex justify-end space-x-3">
-                    <button type="button" onclick="closeCandidateModal()" class="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm">Save Candidate</button>
-                </div>
-            </form>
         </div>
     </div>
 
-    <div id="taskModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
-            <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-slate-800 text-base">Create New Task</h3>
-                <button onclick="closeTaskModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form onsubmit="saveTask(event)" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Task Title *</label>
-                    <input type="text" id="taskTitle" required class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Description</label>
-                    <textarea id="taskDesc" rows="2" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500"></textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Stage</label>
-                        <select id="taskStage" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
-                            <option value="todo">To Do</option>
-                            <option value="inprogress">In Progress</option>
-                            <option value="done">Done</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Assignee</label>
-                        <select id="taskAssignee" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
-                            <!-- Populated -->
-                        </select>
-                    </div>
-                </div>
-                <div class="pt-3 flex justify-end space-x-3">
-                    <button type="button" onclick="closeTaskModal()" class="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm">Create Task</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="supabaseModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden flex flex-col">
-            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
-                <h3 class="font-bold text-base flex items-center"><i class="fa-solid fa-database mr-2 text-indigo-400"></i> Supabase Setup</h3>
-                <button onclick="closeSupabaseModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="p-6 space-y-4 text-sm">
-                <p class="text-slate-600 text-xs">Enter your Supabase credentials to sync data in real time.</p>
-                <div>
-                    <label class="block text-xs font-medium text-slate-700 mb-1">Supabase Project URL</label>
-                    <input type="text" id="supabaseUrlInput" placeholder="https://xyz.supabase.co" class="w-full border border-slate-200 rounded-lg p-2 text-sm font-mono">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-700 mb-1">Supabase Anon Key</label>
-                    <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOi..." class="w-full border border-slate-200 rounded-lg p-2 text-sm font-mono">
-                </div>
-                <div class="flex justify-between items-center pt-2">
-                    <button onclick="clearSupabaseConfig()" class="text-xs text-rose-600 hover:underline font-medium">Disconnect</button>
-                    <div class="space-x-2">
-                        <button onclick="closeSupabaseModal()" class="px-4 py-2 border border-slate-200 rounded-lg text-xs text-slate-600">Cancel</button>
-                        <button onclick="saveSupabaseConfig()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium">Save & Connect</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="deployModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
-            <div class="px-6 py-4 bg-indigo-600 text-white flex justify-between items-center">
-                <h3 class="font-bold text-base flex items-center"><i class="fa-solid fa-rocket mr-2"></i> Deploying to Vercel</h3>
-                <button onclick="closeDeployModal()" class="text-indigo-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="p-6 space-y-3 text-xs text-slate-600">
-                <ol class="list-decimal list-inside space-y-2">
-                    <li>Push your <code class="bg-slate-100 text-indigo-600 px-1 rounded font-mono">index.html</code> file to a GitHub repository.</li>
-                    <li>Go to <a href="https://vercel.com" target="_blank" class="text-indigo-600 underline">Vercel</a> and click <strong>Add New > Project</strong>.</li>
-                    <li>Import your GitHub repository and click <strong>Deploy</strong> (no build command needed).</li>
-                </ol>
-                <div class="pt-2 flex justify-end">
-                    <button onclick="closeDeployModal()" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-medium">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Application Script Logic -->
+    <!-- JavaScript interacting with Vercel Serverless API -->
     <script>
-        let supabaseClient = null;
-        let useSupabase = false;
-
-        let state = {
-            candidates: JSON.parse(localStorage.getItem('crm_candidates')) || [
-                { id: '1', name: 'Alice Johnson', email: 'alice@example.com', phone: '+1 555-0192', position: 'Frontend Developer', status: 'Interviewing', created_at: new Date().toISOString() }
-            ],
-            logs: JSON.parse(localStorage.getItem('crm_logs')) || [
-                { id: 'l1', candidate_name: 'Alice Johnson', type: 'Check-In', message: 'Checked in for technical round.', created_at: new Date().toISOString() }
-            ],
-            attendance: JSON.parse(localStorage.getItem('crm_attendance')) || {},
-            tasks: JSON.parse(localStorage.getItem('crm_tasks')) || [
-                { id: 't1', title: 'Review Alice Resume', description: 'Check system design experience', stage: 'todo', assignee: 'Alice Johnson' }
-            ]
-        };
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedUrl = localStorage.getItem('supabase_url');
-            const savedKey = localStorage.getItem('supabase_key');
-            if (savedUrl && savedKey) {
-                try {
-                    supabaseClient = window.supabase.createClient(savedUrl, savedKey);
-                    useSupabase = true;
-                    document.getElementById('connectionBadge').className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800';
-                    document.getElementById('connectionBadge').innerHTML = '<span class="w-2 h-2 mr-1.5 bg-emerald-500 rounded-full"></span> Supabase Connected';
-                    fetchSupabaseData();
-                } catch(e) { console.error(e); }
-            }
-            document.getElementById('attendanceDate').value = new Date().toISOString().split('T')[0];
-            refreshAllUI();
-        });
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('aside button').forEach(el => {
-                el.className = 'w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50 hover:text-slate-900';
-            });
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            document.getElementById(`nav-${tabId}`).className = 'w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition text-indigo-600 bg-indigo-50';
-        }
-
-        function persistLocal() {
-            if (!useSupabase) {
-                localStorage.setItem('crm_candidates', JSON.stringify(state.candidates));
-                localStorage.setItem('crm_logs', JSON.stringify(state.logs));
-                localStorage.setItem('crm_attendance', JSON.stringify(state.attendance));
-                localStorage.setItem('crm_tasks', JSON.stringify(state.tasks));
-            }
-            refreshAllUI();
-        }
-
-        async function fetchSupabaseData() {
-            if (!useSupabase) return;
+        async function fetchLeads() {
             try {
-                const { data: cand } = await supabaseClient.from('candidates').select('*');
-                if (cand) state.candidates = cand;
-                const { data: lg } = await supabaseClient.from('logs').select('*');
-                if (lg) state.logs = lg;
-                const { data: att } = await supabaseClient.from('attendance').select('*');
-                if (att) {
-                    state.attendance = {};
-                    att.forEach(a => {
-                        if (!state.attendance[a.date]) state.attendance[a.date] = {};
-                        state.attendance[a.date][a.candidate_id] = a.status;
-                    });
-                }
-                const { data: tsk } = await supabaseClient.from('tasks').select('*');
-                if (tsk) state.tasks = tsk;
-                refreshAllUI();
-            } catch (err) { console.error(err); }
-        }
-
-        function refreshAllUI() {
-            renderCandidates();
-            renderLogs();
-            renderAttendance();
-            renderTasks();
-            updateStats();
-            populateDropdowns();
-        }
-
-        function updateStats() {
-            document.getElementById('statCandidates').innerText = state.candidates.length;
-            document.getElementById('statCheckins').innerText = state.logs.filter(l => l.type === 'Check-In').length;
-            document.getElementById('statTasks').innerText = state.tasks.filter(t => t.stage !== 'done').length;
-        }
-
-        function populateDropdowns() {
-            ['logCandidateSelect', 'taskAssignee'].forEach(id => {
-                const sel = document.getElementById(id);
-                if (!sel) return;
-                const cur = sel.value;
-                sel.innerHTML = state.candidates.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-                if (cur) sel.value = cur;
-            });
-        }
-
-        function openCandidateModal(id = null) {
-            document.getElementById('candidateForm').reset();
-            document.getElementById('candidateId').value = '';
-            if (id) {
-                const c = state.candidates.find(item => item.id == id);
-                if (c) {
-                    document.getElementById('candidateModalTitle').innerText = 'Edit Candidate';
-                    document.getElementById('candidateId').value = c.id;
-                    document.getElementById('candName').value = c.name;
-                    document.getElementById('candEmail').value = c.email;
-                    document.getElementById('candPhone').value = c.phone || '';
-                    document.getElementById('candStatus').value = c.status || 'Applied';
-                    document.getElementById('candPosition').value = c.position || '';
-                }
-            } else {
-                document.getElementById('candidateModalTitle').innerText = 'Add Candidate';
-            }
-            document.getElementById('candidateModal').classList.remove('hidden');
-        }
-
-        function closeCandidateModal() { document.getElementById('candidateModal').classList.add('hidden'); }
-
-        async function saveCandidate(e) {
-            e.preventDefault();
-            const id = document.getElementById('candidateId').value;
-            const data = {
-                name: document.getElementById('candName').value,
-                email: document.getElementById('candEmail').value,
-                phone: document.getElementById('candPhone').value,
-                status: document.getElementById('candStatus').value,
-                position: document.getElementById('candPosition').value
-            };
-            if (useSupabase) {
-                if (id) await supabaseClient.from('candidates').update(data).eq('id', id);
-                else await supabaseClient.from('candidates').insert([data]);
-                await fetchSupabaseData();
-            } else {
-                if (id) {
-                    const idx = state.candidates.findIndex(c => c.id == id);
-                    if (idx !== -1) state.candidates[idx] = { ...state.candidates[idx], ...data };
-                } else {
-                    state.candidates.push({ id: 'c_' + Date.now(), ...data, created_at: new Date().toISOString() });
-                }
-                persistLocal();
-            }
-            closeCandidateModal();
-        }
-
-        async function deleteCandidate(id) {
-            if (!confirm('Delete this candidate?')) return;
-            if (useSupabase) {
-                await supabaseClient.from('candidates').delete().eq('id', id);
-                await fetchSupabaseData();
-            } else {
-                state.candidates = state.candidates.filter(c => c.id != id);
-                persistLocal();
-            }
-        }
-
-        function renderCandidates() {
-            const tbody = document.getElementById('candidatesTableBody');
-            const search = document.getElementById('searchCandidates').value.toLowerCase();
-            const filter = document.getElementById('filterCandidateStatus').value;
-            const filtered = state.candidates.filter(c => (c.name.toLowerCase().includes(search) || c.email.toLowerCase().includes(search)) && (!filter || c.status === filter));
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = '';
-                document.getElementById('noCandidates').classList.remove('hidden');
-                return;
-            }
-            document.getElementById('noCandidates').classList.add('hidden');
-
-            const colors = { 'Applied': 'bg-blue-100 text-blue-800', 'Interviewing': 'bg-amber-100 text-amber-800', 'Hired': 'bg-emerald-100 text-emerald-800', 'Rejected': 'bg-rose-100 text-rose-800' };
-            tbody.innerHTML = filtered.map(c => `
-                <tr class="hover:bg-slate-50">
-                    <td class="px-6 py-4 font-medium text-slate-800">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">${c.name.charAt(0)}</div>
-                            <div><div>${c.name}</div><div class="text-xs text-slate-400">Added ${new Date(c.created_at || Date.now()).toLocaleDateString()}</div></div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-slate-600">${c.email}<div class="text-xs text-slate-400">${c.phone || ''}</div></td>
-                    <td class="px-6 py-4 text-slate-600">${c.position || 'General'}</td>
-                    <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${colors[c.status] || 'bg-slate-100'}">${c.status}</span></td>
-                    <td class="px-6 py-4 text-right space-x-2">
-                        <button onclick="openCandidateModal('${c.id}')" class="text-indigo-600 text-xs"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="deleteCandidate('${c.id}')" class="text-rose-600 text-xs"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        async function performCheckIn() {
-            const sel = document.getElementById('logCandidateSelect');
-            if (!sel.value) return alert('Add a candidate first');
-            await recordLog(sel.value, 'Check-In', 'Checked in for day session.');
-        }
-
-        async function performCheckOut() {
-            const sel = document.getElementById('logCandidateSelect');
-            if (!sel.value) return alert('Add a candidate first');
-            await recordLog(sel.value, 'Check-Out', 'Checked out of session.');
-        }
-
-        async function addLogEntry() {
-            const name = document.getElementById('logCandidateSelect').value;
-            const type = document.getElementById('logType').value;
-            const msg = document.getElementById('logMessage').value || 'No remarks.';
-            if (!name) return alert('Select a candidate');
-            await recordLog(name, type, msg);
-            document.getElementById('logMessage').value = '';
-        }
-
-        async function recordLog(name, type, message) {
-            const log = { candidate_name: name, type, message, created_at: new Date().toISOString() };
-            if (useSupabase) {
-                await supabaseClient.from('logs').insert([log]);
-                await fetchSupabaseData();
-            } else {
-                state.logs.unshift({ id: 'l_' + Date.now(), ...log });
-                persistLocal();
-            }
-        }
-
-        function renderLogs() {
-            const feed = document.getElementById('logsFeed');
-            document.getElementById('logCountBadge').innerText = `${state.logs.length} entries`;
-            if (state.logs.length === 0) {
-                feed.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">No logs found.</div>';
-                return;
-            }
-            const badges = { 'Check-In': 'bg-emerald-100 text-emerald-800', 'Check-Out': 'bg-rose-100 text-rose-800', 'Chat Note': 'bg-blue-100 text-blue-800', 'Interview Update': 'bg-amber-100 text-amber-800' };
-            feed.innerHTML = state.logs.map(l => `
-                <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
-                    <div class="flex justify-between"><span class="font-bold text-slate-800">${l.candidate_name}</span><span class="text-[10px] text-slate-400">${new Date(l.created_at || Date.now()).toLocaleString()}</span></div>
-                    <div class="flex items-center space-x-2"><span class="px-2 py-0.5 rounded text-[10px] font-semibold ${badges[l.type] || 'bg-slate-100'}">${l.type}</span><span class="text-slate-600">${l.message}</span></div>
-                </div>
-            `).join('');
-        }
-
-        async function setAttendanceStatus(candidateId, status) {
-            const date = document.getElementById('attendanceDate').value;
-            if (!state.attendance[date]) state.attendance[date] = {};
-            state.attendance[date][candidateId] = status;
-            if (useSupabase) {
-                await supabaseClient.from('attendance').upsert({ candidate_id: candidateId, date, status }, { onConflict: 'candidate_id,date' });
-                await fetchSupabaseData();
-            } else { persistLocal(); }
-        }
-
-        async function markAllAttendance(status) {
-            const date = document.getElementById('attendanceDate').value;
-            if (!state.attendance[date]) state.attendance[date] = {};
-            for (let c of state.candidates) {
-                state.attendance[date][c.id] = status;
-                if (useSupabase) {
-                    await supabaseClient.from('attendance').upsert({ candidate_id: c.id, date, status }, { onConflict: 'candidate_id,date' });
-                }
-            }
-            if (useSupabase) await fetchSupabaseData();
-            else persistLocal();
-        }
-
-        function renderAttendance() {
-            const tbody = document.getElementById('attendanceTableBody');
-            const date = document.getElementById('attendanceDate').value;
-            const rec = state.attendance[date] || {};
-            if (state.candidates.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400 text-xs">No candidates.</td></tr>';
-                return;
-            }
-            const colors = { 'Present': 'bg-emerald-500 text-white', 'Late': 'bg-amber-500 text-white', 'Half-day': 'bg-blue-500 text-white', 'Absent': 'bg-rose-500 text-white', 'Not Marked': 'bg-slate-200 text-slate-700' };
-            tbody.innerHTML = state.candidates.map(c => {
-                const s = rec[c.id] || 'Not Marked';
-                return `
-                    <tr class="hover:bg-slate-50">
-                        <td class="px-6 py-4 font-medium text-slate-800">${c.name}</td>
-                        <td class="px-6 py-4 text-slate-600">${c.email}</td>
-                        <td class="px-6 py-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${colors[s]}">${s}</span></td>
-                        <td class="px-6 py-4 text-right space-x-1">
-                            <button onclick="setAttendanceStatus('${c.id}', 'Present')" class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-medium">Present</button>
-                            <button onclick="setAttendanceStatus('${c.id}', 'Late')" class="px-2 py-1 bg-amber-50 text-amber-700 rounded text-xs font-medium">Late</button>
-                            <button onclick="setAttendanceStatus('${c.id}', 'Half-day')" class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">Half</button>
-                            <button onclick="setAttendanceStatus('${c.id}', 'Absent')" class="px-2 py-1 bg-rose-50 text-rose-700 rounded text-xs font-medium">Absent</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function openTaskModal() { document.getElementById('taskModal').classList.remove('hidden'); }
-        function closeTaskModal() { document.getElementById('taskModal').classList.add('hidden'); }
-
-        async function saveTask(e) {
-            e.preventDefault();
-            const data = {
-                title: document.getElementById('taskTitle').value,
-                description: document.getElementById('taskDesc').value,
-                stage: document.getElementById('taskStage').value,
-                assignee: document.getElementById('taskAssignee').value
-            };
-            if (useSupabase) {
-                await supabaseClient.from('tasks').insert([data]);
-                await fetchSupabaseData();
-            } else {
-                state.tasks.push({ id: 't_' + Date.now(), ...data });
-                persistLocal();
-            }
-            closeTaskModal();
-        }
-
-        async function moveTask(id, stage) {
-            if (useSupabase) {
-                await supabaseClient.from('tasks').update({ stage }).eq('id', id);
-                await fetchSupabaseData();
-            } else {
-                const t = state.tasks.find(x => x.id == id);
-                if (t) t.stage = stage;
-                persistLocal();
-            }
-        }
-
-        async function deleteTask(id) {
-            if (useSupabase) {
-                await supabaseClient.from('tasks').delete().eq('id', id);
-                await fetchSupabaseData();
-            } else {
-                state.tasks = state.tasks.filter(t => t.id != id);
-                persistLocal();
-            }
-        }
-
-        function renderTasks() {
-            ['todo', 'inprogress', 'done'].forEach(stage => {
-                const col = document.getElementById(`col-${stage}`);
-                const list = state.tasks.filter(t => t.stage === stage);
-                document.getElementById(`count-${stage}`).innerText = list.length;
-                if (list.length === 0) {
-                    col.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">No tasks.</div>';
+                const response = await fetch('/api/leads');
+                const leads = await response.json();
+                
+                const tbody = document.getElementById('leadsTableBody');
+                if (leads.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">No leads found. Add your first lead!</td></tr>`;
                     return;
                 }
-                col.innerHTML = list.map(t => `
-                    <div class="bg-white p-3.5 rounded-lg shadow-sm border border-slate-200 space-y-2 text-xs">
-                        <div class="flex justify-between"><span class="font-bold text-slate-800">${t.title}</span><button onclick="deleteTask('${t.id}')" class="text-slate-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button></div>
-                        <p class="text-slate-500">${t.description || ''}</p>
-                        <div class="flex justify-between items-center pt-2 border-t border-slate-100">
-                            <span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-medium">${t.assignee || 'Unassigned'}</span>
-                            <div class="space-x-1">
-                                ${stage !== 'todo' ? `<button onclick="moveTask('${t.id}', '${stage === 'done' ? 'inprogress' : 'todo'}')" class="text-slate-500"><i class="fa-solid fa-arrow-left"></i></button>` : ''}
-                                ${stage !== 'done' ? `<button onclick="moveTask('${t.id}', '${stage === 'todo' ? 'inprogress' : 'done'}')" class="text-indigo-600 font-semibold"><i class="fa-solid fa-arrow-right"></i></button>` : ''}
-                            </div>
-                        </div>
-                    </div>
+
+                tbody.innerHTML = leads.map(lead => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 px-3 font-medium text-gray-800">${lead.name || ''}</td>
+                        <td class="py-3 px-3 text-gray-500">${lead.email || '-'}</td>
+                        <td class="py-3 px-3 text-gray-500">${lead.phone || '-'}</td>
+                        <td class="py-3 px-3">₹${lead.value || 0}</td>
+                        <td class="py-3 px-3"><span class="bg-blue-50 text-blue-600 text-xs px-2 py-1 rounded-full">${lead.status || 'New'}</span></td>
+                    </tr>
                 `).join('');
-            });
+            } catch (err) {
+                console.error('Error fetching leads:', err);
+            }
         }
 
-        function openSupabaseModal() {
-            document.getElementById('supabaseUrlInput').value = localStorage.getItem('supabase_url') || '';
-            document.getElementById('supabaseKeyInput').value = localStorage.getItem('supabase_key') || '';
-            document.getElementById('supabaseModal').classList.remove('hidden');
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const newLead = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                value: parseFloat(document.getElementById('value').value) || 0,
+                status: 'New'
+            };
+
+            try {
+                const response = await fetch('/api/leads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newLead)
+                });
+
+                if (response.ok) {
+                    document.getElementById('leadForm').reset();
+                    fetchLeads(); // Refresh table
+                } else {
+                    alert('Failed to save lead');
+                }
+            } catch (err) {
+                console.error('Error saving lead:', err);
+            }
         }
-        function closeSupabaseModal() { document.getElementById('supabaseModal').classList.add('hidden'); }
-        function saveSupabaseConfig() {
-            const url = document.getElementById('supabaseUrlInput').value.trim();
-            const key = document.getElementById('supabaseKeyInput').value.trim();
-            if (!url || !key) return alert('Enter both URL and Key');
-            localStorage.setItem('supabase_url', url);
-            localStorage.setItem('supabase_key', key);
-            location.reload();
-        }
-        function clearSupabaseConfig() {
-            localStorage.removeItem('supabase_url');
-            localStorage.removeItem('supabase_key');
-            location.reload();
-        }
-        function openDeployModal() { document.getElementById('deployModal').classList.remove('hidden'); }
-        function closeDeployModal() { document.getElementById('deployModal').classList.add('hidden'); }
+
+        // Load leads on initial page load
+        fetchLeads();
     </script>
 </body>
 </html>
