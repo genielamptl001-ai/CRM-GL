@@ -14,10 +14,10 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
     <script>
-        // --- CONFIGURE YOUR SUPABASE CREDENTIALS HERE ---
+        // --- PASTE YOUR SUPABASE CREDENTIALS HERE ---
         const SUPABASE_URL = 'YOUR_SUPABASE_URL'; 
         const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        // ------------------------------------------------
+        // --------------------------------------------
         
         let supabaseClient = null;
         if (window.supabase && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
@@ -27,223 +27,99 @@
 </head>
 <body class="bg-gray-100 h-screen overflow-hidden flex font-sans">
 
-    <!-- 1. PRIMARY DARK NAV BAR -->
+    <!-- SIDEBAR -->
     <aside class="w-64 bg-[#0B1E3B] text-gray-300 flex flex-col justify-between select-none shrink-0 border-r border-blue-950 z-20">
         <div>
             <div class="h-16 flex items-center px-6 border-b border-blue-900/40 bg-[#07152B] gap-3">
-                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                    💡
-                </div>
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg">💡</div>
                 <div>
                     <span class="text-white font-bold text-lg tracking-wide block leading-none">GLamp</span>
                     <span class="text-[10px] text-blue-300 font-medium tracking-wider uppercase">Enterprise Workspace</span>
                 </div>
             </div>
-
             <div class="p-3">
-                <p class="px-3 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Core Modules</p>
                 <nav class="space-y-1 text-sm">
-                    <button onclick="switchTab('candidates')" id="btn-candidates" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-sm font-medium transition">
+                    <button onclick="switchTab('candidates')" id="btn-candidates" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white font-medium transition">
                         <span>🎓</span> Candidates
-                    </button>
-                    <button onclick="switchTab('messages')" id="btn-messages" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-900/40 hover:text-white transition">
-                        <span class="flex items-center gap-3"><span>💬</span> Messenger / Chats</span>
-                        <span class="w-2 h-2 rounded-full bg-blue-400"></span>
                     </button>
                     <button onclick="switchTab('leads')" id="btn-leads" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-900/40 hover:text-white transition">
                         <span class="flex items-center gap-3"><span>🎯</span> Leads</span>
                         <span id="badge-leads-count" class="text-xs bg-blue-900/80 text-blue-200 px-2 py-0.5 rounded-full font-semibold">0</span>
                     </button>
-                    <button onclick="switchTab('deals')" id="btn-deals" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-900/40 hover:text-white transition">
-                        <span>📈</span> Deals
-                    </button>
-                    <button onclick="switchTab('customers')" id="btn-customers" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-900/40 hover:text-white transition">
-                        <span>🏢</span> Customers
-                    </button>
-                </nav>
-
-                <p class="px-3 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2">Operations</p>
-                <nav class="space-y-1 text-sm">
                     <button onclick="switchTab('attendance')" id="btn-attendance" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-900/40 hover:text-white transition">
                         <span>⏰</span> Attendance Log
                     </button>
                 </nav>
             </div>
         </div>
-
         <div class="p-4 border-t border-blue-900/40 bg-[#07152B] flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                AM
-            </div>
-            <div class="truncate">
-                <p class="text-xs font-semibold text-white truncate">Alex Mercer</p>
-                <p class="text-[10px] text-gray-400 truncate">Account Executive</p>
+            <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-xs">AM</div>
+            <div>
+                <p class="text-xs font-semibold text-white">Alex Mercer</p>
+                <p class="text-[10px] text-gray-400">Account Executive</p>
             </div>
         </div>
     </aside>
 
-    <!-- 2. MAIN WORKSPACE CONTAINER -->
+    <!-- MAIN CONTENT AREA -->
     <main class="flex-1 flex flex-col h-screen bg-[#F0F2F5] overflow-hidden">
-        <header class="h-16 bg-white border-b border-gray-200 px-6 flex justify-between items-center shrink-0 z-10 shadow-sm">
-            <div class="flex items-center gap-4 flex-1 max-w-md">
-                <div class="relative w-full">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-sm">🔍</span>
-                    <input type="text" placeholder="Search GLamp workspace..." class="w-full pl-9 pr-4 py-2 bg-gray-100 border-0 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                </div>
-            </div>
-            <div class="flex items-center gap-4 text-sm text-gray-600">
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-semibold text-gray-500">Module:</span>
-                    <span id="current-module-title" class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">Candidates</span>
-                </div>
-                <div class="h-4 w-px bg-gray-300"></div>
-                <span id="header-clock" class="text-xs text-gray-500 font-mono">10:00:00 AM</span>
-            </div>
+        <header class="h-16 bg-white border-b border-gray-200 px-6 flex justify-between items-center shrink-0 z-10">
+            <h1 class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-md border border-blue-100" id="current-module-title">Candidates</h1>
+            <span id="header-clock" class="text-xs text-gray-500 font-mono">10:00:00 AM</span>
         </header>
 
         <div class="flex-1 overflow-hidden relative">
-            <!-- MODULE 1: CANDIDATES -->
+            <!-- CANDIDATES VIEW -->
             <section id="view-candidates" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar">
                 <div class="max-w-7xl mx-auto space-y-6">
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border flex justify-between items-center">
                         <div>
                             <h2 class="text-xl font-bold text-gray-800">Candidates Talent Pool</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Recruitment stages and direct client-side Supabase records</p>
+                            <p class="text-xs text-gray-500">Recruitment stages and live Supabase records</p>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <div class="flex bg-gray-100 p-1 rounded-lg text-xs font-medium text-gray-600">
-                                <button onclick="filterCandidates('All')" id="filter-All" class="px-3 py-1.5 rounded-md bg-white text-gray-900 shadow-sm font-semibold">All</button>
-                                <button onclick="filterCandidates('Screening')" id="filter-Screening" class="px-3 py-1.5 rounded-md hover:text-gray-900">Screening</button>
-                                <button onclick="filterCandidates('Interview')" id="filter-Interview" class="px-3 py-1.5 rounded-md hover:text-gray-900">Interview</button>
-                                <button onclick="filterCandidates('Hired')" id="filter-Hired" class="px-3 py-1.5 rounded-md hover:text-gray-900">Hired</button>
-                            </div>
-                            <button onclick="openCandidateModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
-                                <span>+</span> Add Candidate
-                            </button>
-                        </div>
+                        <button onclick="openCandidateModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition">
+                            + Add Candidate
+                        </button>
                     </div>
-                    <div id="candidatesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="col-span-full text-center py-8 text-gray-400 text-xs">Loading candidates...</div>
+                    <div id="candidatesGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="col-span-full text-center py-8 text-gray-400 text-xs">Loading candidates from Supabase...</div>
                     </div>
                 </div>
             </section>
 
-            <!-- MODULE 2: MESSENGER -->
-            <section id="view-messages" class="absolute inset-0 flex overflow-hidden hidden">
-                <div class="w-80 bg-white border-r border-gray-200 flex flex-col shrink-0">
-                    <div class="p-3 border-b border-gray-100">
-                        <input type="text" placeholder="Filter conversations..." class="w-full bg-gray-100 border-0 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-gray-100 text-xs">
-                        <div class="p-3.5 hover:bg-gray-50 cursor-pointer bg-blue-50/50 border-l-4 border-blue-600">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="font-semibold text-gray-900">General Discussion</span>
-                                <span class="text-[10px] text-gray-400">4:32 PM</span>
-                            </div>
-                            <p class="text-gray-500 truncate">Alex: Welcome to GLamp Workspace!</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-1 flex flex-col bg-[#F7F9FB]">
-                    <div class="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center shadow-sm">
-                        <h3 class="font-bold text-gray-800 text-sm">General Discussion</h3>
-                    </div>
-                    <div class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-4">
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm max-w-lg border border-gray-200/80">
-                            <p class="text-xs font-semibold text-blue-600 mb-1">System Notification</p>
-                            <p class="text-xs text-gray-700">Welcome to GLamp Enterprise CRM workspace!</p>
-                        </div>
-                    </div>
-                    <div class="p-4 bg-white border-t border-gray-200">
-                        <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
-                            <input type="text" placeholder="Type a message..." class="flex-1 bg-transparent text-xs focus:outline-none text-gray-700">
-                            <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Send</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- MODULE 3: LEADS -->
+            <!-- LEADS VIEW -->
             <section id="view-leads" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden">
                 <div class="max-w-7xl mx-auto space-y-6">
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200/80">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border">
                         <h3 class="text-base font-bold text-gray-800 mb-3">Add New Lead</h3>
                         <form id="leadForm" onsubmit="handleLeadSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Lead Name</label>
-                                <input type="text" id="lead-name" required placeholder="John Doe" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Email</label>
-                                <input type="email" id="lead-email" placeholder="john@example.com" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Phone</label>
-                                <input type="text" id="lead-phone" placeholder="+123456789" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Value (₹)</label>
-                                <input type="number" id="lead-value" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs">
-                            </div>
-                            <button type="submit" class="bg-blue-600 text-white font-medium py-1.5 px-4 rounded-lg hover:bg-blue-700 text-xs h-[32px]">Save Lead</button>
+                            <input type="text" id="lead-name" required placeholder="Lead Name" class="border rounded-lg px-3 py-1.5 text-xs">
+                            <input type="email" id="lead-email" placeholder="Email" class="border rounded-lg px-3 py-1.5 text-xs">
+                            <input type="text" id="lead-phone" placeholder="Phone" class="border rounded-lg px-3 py-1.5 text-xs">
+                            <input type="number" id="lead-value" value="0" class="border rounded-lg px-3 py-1.5 text-xs">
+                            <button type="submit" class="bg-blue-600 text-white py-1.5 px-4 rounded-lg text-xs">Save Lead</button>
                         </form>
                     </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200/80 overflow-x-auto">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-base font-bold text-gray-800">Leads Database</h3>
-                            <button onclick="fetchLeads()" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg font-medium text-gray-700">🔄 Refresh</button>
-                        </div>
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b text-[11px] text-gray-400 font-semibold uppercase tracking-wider">
-                                    <th class="py-2.5 px-3">Name</th>
-                                    <th class="py-2.5 px-3">Email</th>
-                                    <th class="py-2.5 px-3">Phone</th>
-                                    <th class="py-2.5 px-3">Value</th>
-                                    <th class="py-2.5 px-3">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leadsTableBody" class="text-xs text-gray-700 divide-y">
-                                <tr><td colspan="5" class="text-center py-4 text-gray-400">Loading leads...</td></tr>
-                            </tbody>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead><tr class="border-b text-[11px] text-gray-400 uppercase"><th class="py-2.5 px-3">Name</th><th class="py-2.5 px-3">Email</th><th class="py-2.5 px-3">Value</th></tr></thead>
+                            <tbody id="leadsTableBody" class="text-xs text-gray-700 divide-y"></tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
-            <!-- MODULE 4: DEALS -->
-            <section id="view-deals" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden">
-                <div class="max-w-7xl mx-auto space-y-4">
-                    <h2 class="text-xl font-bold text-gray-800">Deals Pipeline</h2>
-                </div>
-            </section>
-
-            <!-- MODULE 5: CUSTOMERS -->
-            <section id="view-customers" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200/80 p-6 max-w-7xl mx-auto">
-                    <h2 class="text-xl font-bold text-gray-800 mb-2">Customers Directory</h2>
-                </div>
-            </section>
-
-            <!-- MODULE 6: ATTENDANCE -->
+            <!-- ATTENDANCE VIEW -->
             <section id="view-attendance" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden space-y-6">
                 <div class="max-w-7xl mx-auto space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200/80 flex justify-between items-center">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border flex justify-between items-center">
                         <h2 class="text-xl font-bold text-gray-800">Attendance Tracker</h2>
-                        <button onclick="recordAttendance('Checked In')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-xs font-semibold shadow-sm">⏱ Check In Now</button>
+                        <button onclick="recordAttendance('Checked In')" class="bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-xs font-semibold">⏱ Check In Now</button>
                     </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200/80 overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b text-[11px] text-gray-400 font-semibold uppercase tracking-wider">
-                                    <th class="py-2.5 px-3">Employee</th>
-                                    <th class="py-2.5 px-3">Status</th>
-                                    <th class="py-2.5 px-3">Timestamp</th>
-                                </tr>
-                            </thead>
-                            <tbody id="attendanceTableBody" class="text-xs text-gray-700 divide-y">
-                                <tr><td colspan="3" class="text-center py-4 text-gray-400">Loading attendance...</td></tr>
-                            </tbody>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead><tr class="border-b text-[11px] text-gray-400 uppercase"><th class="py-2.5 px-3">Employee</th><th class="py-2.5 px-3">Status</th><th class="py-2.5 px-3">Time</th></tr></thead>
+                            <tbody id="attendanceTableBody" class="text-xs text-gray-700 divide-y"></tbody>
                         </table>
                     </div>
                 </div>
@@ -253,43 +129,43 @@
 
     <!-- ADD CANDIDATE MODAL -->
     <div id="candidateModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-xl shadow-xl border border-gray-200 max-w-md w-full p-6 space-y-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="text-base font-bold text-gray-800">Add New Candidate</h3>
-                <button onclick="closeCandidateModal()" class="text-gray-400 hover:text-gray-600 font-bold text-sm">✕</button>
+                <button onclick="closeCandidateModal()" class="text-gray-400 font-bold text-sm">✕</button>
             </div>
             <form id="candidateForm" onsubmit="handleCandidateSubmit(event)" class="space-y-3">
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Full Name</label>
-                    <input type="text" id="cand-name" required placeholder="e.g. Jordan Rivera" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none">
+                    <input type="text" id="cand-name" required placeholder="Jordan Rivera" class="w-full border rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Email</label>
-                    <input type="email" id="cand-email" placeholder="jordan@example.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none">
+                    <input type="email" id="cand-email" placeholder="jordan@example.com" class="w-full border rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Phone</label>
-                    <input type="text" id="cand-phone" placeholder="+1 234 567 890" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none">
+                    <input type="text" id="cand-phone" placeholder="+1 234 567 890" class="w-full border rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Role / Position</label>
-                    <input type="text" id="cand-role" required placeholder="e.g. Lead Product Designer" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none">
+                    <input type="text" id="cand-role" required placeholder="Lead Product Designer" class="w-full border rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Experience</label>
-                    <input type="text" id="cand-exp" placeholder="e.g. 5 Years Exp" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none">
+                    <input type="text" id="cand-exp" placeholder="5 Years Exp" class="w-full border rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Stage</label>
-                    <select id="cand-stage" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white outline-none">
+                    <select id="cand-stage" class="w-full border rounded-lg px-3 py-2 text-xs bg-white outline-none">
                         <option value="Screening">Screening</option>
                         <option value="Interview">Interview</option>
                         <option value="Hired">Hired</option>
                     </select>
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t">
-                    <button type="button" onclick="closeCandidateModal()" class="px-4 py-2 border rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" id="cand-submit-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">Save Candidate</button>
+                    <button type="button" onclick="closeCandidateModal()" class="px-4 py-2 border rounded-lg text-xs text-gray-600">Cancel</button>
+                    <button type="submit" id="cand-submit-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold">Save Candidate</button>
                 </div>
             </form>
         </div>
@@ -297,17 +173,17 @@
 
     <script>
         let candidatesList = [];
-        let activeFilter = 'All';
 
         setInterval(() => {
             document.getElementById('header-clock').innerText = new Date().toLocaleTimeString();
         }, 1000);
 
         function switchTab(tabId) {
-            const tabs = ['candidates', 'messages', 'leads', 'deals', 'customers', 'attendance'];
-            tabs.forEach(t => {
-                document.getElementById(`view-${t}`).classList.add('hidden');
-                document.getElementById(`btn-${t}`).className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-900/40 hover:text-white transition";
+            ['candidates', 'leads', 'attendance'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.add('hidden');
+                const btn = document.getElementById(`btn-${t}`);
+                if (btn) btn.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-900/40 hover:text-white transition";
             });
 
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
@@ -324,60 +200,39 @@
             document.getElementById('candidateForm').reset();
         }
 
-        function filterCandidates(filter) {
-            activeFilter = filter;
-            ['All', 'Screening', 'Interview', 'Hired'].forEach(f => {
-                const btn = document.getElementById(`filter-${f}`);
-                if (btn) btn.className = f === filter ? 'px-3 py-1.5 rounded-md bg-white text-gray-900 shadow-sm font-semibold' : 'px-3 py-1.5 rounded-md text-gray-600';
-            });
-            renderCandidates();
-        }
-
         function renderCandidates() {
             const grid = document.getElementById('candidatesGrid');
-            const filtered = activeFilter === 'All' ? candidatesList : candidatesList.filter(c => c.stage === activeFilter);
-
-            if (!filtered || filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full bg-white p-8 rounded-xl border text-center text-gray-400 text-xs">No candidates found under '${activeFilter}' stage.</div>`;
+            if (!candidatesList || candidatesList.length === 0) {
+                grid.innerHTML = `<div class="col-span-full bg-white p-8 rounded-xl border text-center text-gray-400 text-xs">No candidates found in Supabase.</div>`;
                 return;
             }
 
-            const stageColors = { Screening: 'bg-purple-50 text-purple-600 border-purple-200', Interview: 'bg-purple-100 text-purple-700 border-purple-300', Hired: 'bg-emerald-50 text-emerald-600 border-emerald-200' };
-
-            grid.innerHTML = filtered.map(c => `
-                <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-3">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-bold text-gray-900 text-sm">${c.name}</h4>
-                            <p class="text-xs text-blue-600 font-medium mt-0.5">${c.position || c.role || 'Software Engineer'}</p>
-                            ${c.email ? `<p class="text-[11px] text-gray-400 mt-0.5">${c.email}</p>` : ''}
-                        </div>
-                        <span class="text-[10px] font-semibold px-2.5 py-1 rounded-md border ${stageColors[c.stage] || 'bg-gray-100'}">${c.stage}</span>
+            grid.innerHTML = candidatesList.map(c => `
+                <div class="bg-white p-5 rounded-xl border shadow-sm space-y-3">
+                    <div>
+                        <h4 class="font-bold text-gray-900 text-sm">${c.name}</h4>
+                        <p class="text-xs text-blue-600 font-medium">${c.position || c.role || 'Software Engineer'}</p>
+                        ${c.email ? `<p class="text-[11px] text-gray-400">${c.email}</p>` : ''}
                     </div>
-                    <div class="flex justify-between items-center text-xs text-gray-500 pt-2 border-t border-gray-100">
+                    <div class="flex justify-between items-center text-xs text-gray-500 pt-2 border-t">
                         <span>💼 ${c.experience || '0 Years'}</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-600">${c.stage || 'Screening'}</span>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Direct Client-Side Supabase Calls
         async function fetchCandidates() {
             if (!supabaseClient) return;
-            try {
-                const { data, error } = await supabaseClient.from('candidates').select('*').order('id', { ascending: false });
-                if (error) throw error;
-                candidatesList = data || [];
-            } catch (err) {
-                console.error('Error fetching candidates:', err.message);
-            }
+            const { data, error } = await supabaseClient.from('candidates').select('*').order('id', { ascending: false });
+            if (!error) candidatesList = data || [];
             renderCandidates();
         }
 
         async function handleCandidateSubmit(event) {
             event.preventDefault();
             if (!supabaseClient) {
-                alert('Supabase credentials are not configured in the script header.');
+                alert('Please configure your SUPABASE_URL and SUPABASE_ANON_KEY at the top of the file.');
                 return;
             }
 
@@ -404,7 +259,7 @@
                 closeCandidateModal();
                 renderCandidates();
             } catch (err) {
-                alert('Failed to save candidate: ' + err.message);
+                alert('Database Error: ' + err.message);
             } finally {
                 submitBtn.innerText = 'Save Candidate';
                 submitBtn.disabled = false;
@@ -416,23 +271,21 @@
             const { data } = await supabaseClient.from('crm_leads').select('*');
             const tbody = document.getElementById('leadsTableBody');
             if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">No leads found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-400">No leads found.</td></tr>`;
                 return;
             }
-            tbody.innerHTML = data.map(l => `<tr class="hover:bg-gray-50"><td class="py-3 px-3 font-semibold">${l.name}</td><td class="py-3 px-3">${l.email || '-'}</td><td class="py-3 px-3">${l.phone || '-'}</td><td class="py-3 px-3">₹${l.value || 0}</td><td class="py-3 px-3">${l.status || 'New'}</td></tr>`).join('');
+            tbody.innerHTML = data.map(l => `<tr class="hover:bg-gray-50"><td class="py-3 px-3 font-semibold">${l.name}</td><td class="py-3 px-3">${l.email || '-'}</td><td class="py-3 px-3">₹${l.value || 0}</td></tr>`).join('');
         }
 
         async function handleLeadSubmit(event) {
             event.preventDefault();
             if (!supabaseClient) return;
-            const newLead = {
+            await supabaseClient.from('crm_leads').insert([{
                 name: document.getElementById('lead-name').value,
                 email: document.getElementById('lead-email').value,
                 phone: document.getElementById('lead-phone').value,
-                value: parseFloat(document.getElementById('lead-value').value) || 0,
-                status: 'New'
-            };
-            await supabaseClient.from('crm_leads').insert([newLead]);
+                value: parseFloat(document.getElementById('lead-value').value) || 0
+            }]);
             document.getElementById('leadForm').reset();
             fetchLeads();
         }
@@ -454,7 +307,7 @@
             fetchAttendance();
         }
 
-        // Initialize on load
+        // Initial Load
         fetchCandidates();
     </script>
 </body>
