@@ -14,10 +14,10 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
     <script>
-        // --- PASTE YOUR SUPABASE CREDENTIALS HERE ---
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL'; 
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        // --------------------------------------------
+        // --- PASTE YOUR ACTUAL SUPABASE CREDENTIALS HERE ---
+        const SUPABASE_URL = 'https://droblcbaecevpwkxmwlp.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyb2JsY2JhZWNldnB3a3htd2xwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5Njg1MzIsImV4cCI6MjEwNzU0NDUzMn0._0CciHvp9lOvP-2I_TPiTteXwznaoEzkMo5Ipm2mjmM';
+        // ---------------------------------------------------
         
         let supabaseClient = null;
         if (window.supabase && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
@@ -42,6 +42,12 @@
                     <button onclick="switchTab('candidates')" id="btn-candidates" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white font-medium transition">
                         <span>🎓</span> Candidates
                     </button>
+                    <button onclick="switchTab('messages')" id="btn-messages" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-900/40 hover:text-white transition">
+                        <span class="flex items-center gap-3"><span>💬</span> Chats</span>
+                    </button>
+                    <button onclick="switchTab('tasks')" id="btn-tasks" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-900/40 hover:text-white transition">
+                        <span class="flex items-center gap-3"><span>📋</span> Tasks</span>
+                    </button>
                     <button onclick="switchTab('leads')" id="btn-leads" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-900/40 hover:text-white transition">
                         <span class="flex items-center gap-3"><span>🎯</span> Leads</span>
                         <span id="badge-leads-count" class="text-xs bg-blue-900/80 text-blue-200 px-2 py-0.5 rounded-full font-semibold">0</span>
@@ -61,7 +67,7 @@
         </div>
     </aside>
 
-    <!-- MAIN CONTENT AREA -->
+    <!-- MAIN WORKSPACE -->
     <main class="flex-1 flex flex-col h-screen bg-[#F0F2F5] overflow-hidden">
         <header class="h-16 bg-white border-b border-gray-200 px-6 flex justify-between items-center shrink-0 z-10">
             <h1 class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-md border border-blue-100" id="current-module-title">Candidates</h1>
@@ -69,7 +75,8 @@
         </header>
 
         <div class="flex-1 overflow-hidden relative">
-            <!-- CANDIDATES VIEW -->
+            
+            <!-- 1. CANDIDATES -->
             <section id="view-candidates" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar">
                 <div class="max-w-7xl mx-auto space-y-6">
                     <div class="bg-white p-5 rounded-xl shadow-sm border flex justify-between items-center">
@@ -87,7 +94,49 @@
                 </div>
             </section>
 
-            <!-- LEADS VIEW -->
+            <!-- 2. CHATS -->
+            <section id="view-messages" class="absolute inset-0 flex flex-col bg-[#F7F9FB] hidden">
+                <div class="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center shadow-sm">
+                    <h3 class="font-bold text-gray-800 text-sm">Team Live Chat</h3>
+                    <button onclick="fetchMessages()" class="text-xs text-blue-600 font-semibold">🔄 Refresh</button>
+                </div>
+                <div id="chatMessagesContainer" class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-3">
+                    <p class="text-center text-xs text-gray-400">Loading chat messages...</p>
+                </div>
+                <div class="p-4 bg-white border-t border-gray-200">
+                    <form onsubmit="handleSendChat(event)" class="flex items-center gap-2">
+                        <input type="text" id="chat-input" required placeholder="Type a message..." class="flex-1 bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold transition">Send</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 3. TASKS -->
+            <section id="view-tasks" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden">
+                <div class="max-w-7xl mx-auto space-y-6">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border">
+                        <h3 class="text-base font-bold text-gray-800 mb-3">Create New Task</h3>
+                        <form onsubmit="handleTaskSubmit(event)" class="flex gap-3 items-center">
+                            <input type="text" id="task-title" required placeholder="Task title..." class="flex-1 border rounded-lg px-3 py-2 text-xs outline-none">
+                            <select id="task-priority" class="border rounded-lg px-3 py-2 text-xs bg-white outline-none">
+                                <option value="Low">Low Priority</option>
+                                <option value="Medium" selected>Medium Priority</option>
+                                <option value="High">High Priority</option>
+                            </select>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold">Add Task</button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl shadow-sm border">
+                        <h3 class="text-base font-bold text-gray-800 mb-4">Task List</h3>
+                        <div id="tasksList" class="space-y-2 text-xs">
+                            <p class="text-gray-400 text-center py-4">Loading tasks...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. LEADS -->
             <section id="view-leads" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden">
                 <div class="max-w-7xl mx-auto space-y-6">
                     <div class="bg-white p-5 rounded-xl shadow-sm border">
@@ -95,26 +144,29 @@
                         <form id="leadForm" onsubmit="handleLeadSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
                             <input type="text" id="lead-name" required placeholder="Lead Name" class="border rounded-lg px-3 py-1.5 text-xs">
                             <input type="email" id="lead-email" placeholder="Email" class="border rounded-lg px-3 py-1.5 text-xs">
-                            <input type="text" id="lead-phone" placeholder="Phone" class="border rounded-lg px-3 py-1.5 text-xs">
+                            
+                            <!-- Phone digits only -->
+                            <input type="text" id="lead-phone" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Phone (Digits only)" class="border rounded-lg px-3 py-1.5 text-xs">
+                            
                             <input type="number" id="lead-value" value="0" class="border rounded-lg px-3 py-1.5 text-xs">
-                            <button type="submit" class="bg-blue-600 text-white py-1.5 px-4 rounded-lg text-xs">Save Lead</button>
+                            <button type="submit" class="bg-blue-600 text-white py-1.5 px-4 rounded-lg text-xs font-semibold">Save Lead</button>
                         </form>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border overflow-x-auto">
                         <table class="w-full text-left">
-                            <thead><tr class="border-b text-[11px] text-gray-400 uppercase"><th class="py-2.5 px-3">Name</th><th class="py-2.5 px-3">Email</th><th class="py-2.5 px-3">Value</th></tr></thead>
+                            <thead><tr class="border-b text-[11px] text-gray-400 uppercase"><th class="py-2.5 px-3">Name</th><th class="py-2.5 px-3">Email</th><th class="py-2.5 px-3">Phone</th><th class="py-2.5 px-3">Value</th></tr></thead>
                             <tbody id="leadsTableBody" class="text-xs text-gray-700 divide-y"></tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
-            <!-- ATTENDANCE VIEW -->
+            <!-- 5. ATTENDANCE -->
             <section id="view-attendance" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar hidden space-y-6">
                 <div class="max-w-7xl mx-auto space-y-6">
                     <div class="bg-white p-6 rounded-xl shadow-sm border flex justify-between items-center">
                         <h2 class="text-xl font-bold text-gray-800">Attendance Tracker</h2>
-                        <button onclick="recordAttendance('Checked In')" class="bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-xs font-semibold">⏱ Check In Now</button>
+                        <button onclick="recordAttendance('Checked In')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-xs font-semibold shadow-sm">⏱ Check In Now</button>
                     </div>
                     <div class="bg-white p-5 rounded-xl shadow-sm border overflow-x-auto">
                         <table class="w-full text-left">
@@ -124,10 +176,11 @@
                     </div>
                 </div>
             </section>
+
         </div>
     </main>
 
-    <!-- ADD CANDIDATE MODAL -->
+    <!-- CANDIDATE MODAL -->
     <div id="candidateModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -144,8 +197,9 @@
                     <input type="email" id="cand-email" placeholder="jordan@example.com" class="w-full border rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Phone</label>
-                    <input type="text" id="cand-phone" placeholder="+1 234 567 890" class="w-full border rounded-lg px-3 py-2 text-xs outline-none">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Phone (Digits only)</label>
+                    <!-- Strict Digits Only Input -->
+                    <input type="text" id="cand-phone" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="8765432123" class="w-full border rounded-lg px-3 py-2 text-xs outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Role / Position</label>
@@ -171,6 +225,7 @@
         </div>
     </div>
 
+    <!-- SCRIPT HANDLERS -->
     <script>
         let candidatesList = [];
 
@@ -179,7 +234,7 @@
         }, 1000);
 
         function switchTab(tabId) {
-            ['candidates', 'leads', 'attendance'].forEach(t => {
+            ['candidates', 'messages', 'tasks', 'leads', 'attendance'].forEach(t => {
                 const el = document.getElementById(`view-${t}`);
                 if (el) el.classList.add('hidden');
                 const btn = document.getElementById(`btn-${t}`);
@@ -189,9 +244,13 @@
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
             document.getElementById(`btn-${tabId}`).className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-sm font-medium transition";
 
+            document.getElementById('current-module-title').innerText = tabId.toUpperCase();
+
+            if (tabId === 'candidates') fetchCandidates();
+            if (tabId === 'messages') fetchMessages();
+            if (tabId === 'tasks') fetchTasks();
             if (tabId === 'leads') fetchLeads();
             if (tabId === 'attendance') fetchAttendance();
-            if (tabId === 'candidates') fetchCandidates();
         }
 
         function openCandidateModal() { document.getElementById('candidateModal').classList.remove('hidden'); }
@@ -200,6 +259,7 @@
             document.getElementById('candidateForm').reset();
         }
 
+        // 1. CANDIDATES
         function renderCandidates() {
             const grid = document.getElementById('candidatesGrid');
             if (!candidatesList || candidatesList.length === 0) {
@@ -212,6 +272,7 @@
                     <div>
                         <h4 class="font-bold text-gray-900 text-sm">${c.name}</h4>
                         <p class="text-xs text-blue-600 font-medium">${c.position || c.role || 'Software Engineer'}</p>
+                        ${c.phone ? `<p class="text-[11px] text-gray-500 mt-1">📞 ${c.phone}</p>` : ''}
                         ${c.email ? `<p class="text-[11px] text-gray-400">${c.email}</p>` : ''}
                     </div>
                     <div class="flex justify-between items-center text-xs text-gray-500 pt-2 border-t">
@@ -266,15 +327,95 @@
             }
         }
 
-        async function fetchLeads() {
+        // 2. CHATS
+        async function fetchMessages() {
             if (!supabaseClient) return;
-            const { data } = await supabaseClient.from('crm_leads').select('*');
-            const tbody = document.getElementById('leadsTableBody');
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-400">No leads found.</td></tr>`;
+            const { data, error } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: true });
+            const container = document.getElementById('chatMessagesContainer');
+            if (error || !data || data.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs text-gray-400">No chat messages yet.</p>`;
                 return;
             }
-            tbody.innerHTML = data.map(l => `<tr class="hover:bg-gray-50"><td class="py-3 px-3 font-semibold">${l.name}</td><td class="py-3 px-3">${l.email || '-'}</td><td class="py-3 px-3">₹${l.value || 0}</td></tr>`).join('');
+            container.innerHTML = data.map(m => `
+                <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm max-w-lg">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-xs text-blue-600">${m.sender || 'Alex Mercer'}</span>
+                        <span class="text-[10px] text-gray-400">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    </div>
+                    <p class="text-xs text-gray-700">${m.message}</p>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function handleSendChat(e) {
+            e.preventDefault();
+            if (!supabaseClient) return;
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const { error } = await supabaseClient.from('messages').insert([{ sender: 'Alex Mercer', message: msg }]);
+            if (!error) {
+                input.value = '';
+                fetchMessages();
+            }
+        }
+
+        // 3. TASKS
+        async function fetchTasks() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient.from('tasks').select('*').order('id', { ascending: false });
+            const container = document.getElementById('tasksList');
+            if (error || !data || data.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs text-gray-400 py-4">No tasks found.</p>`;
+                return;
+            }
+
+            const priorityColors = { High: 'bg-red-50 text-red-600 border-red-200', Medium: 'bg-yellow-50 text-yellow-600 border-yellow-200', Low: 'bg-gray-100 text-gray-600' };
+
+            container.innerHTML = data.map(t => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 border rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" ${t.status === 'Completed' ? 'checked' : ''} onchange="toggleTaskStatus(${t.id}, '${t.status}')">
+                        <span class="${t.status === 'Completed' ? 'line-through text-gray-400' : 'text-gray-800 font-medium'}">${t.title}</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold border ${priorityColors[t.priority] || 'bg-gray-100'}">${t.priority}</span>
+                </div>
+            `).join('');
+        }
+
+        async function handleTaskSubmit(e) {
+            e.preventDefault();
+            if (!supabaseClient) return;
+            const title = document.getElementById('task-title').value.trim();
+            const priority = document.getElementById('task-priority').value;
+
+            const { error } = await supabaseClient.from('tasks').insert([{ title, priority, status: 'Pending' }]);
+            if (!error) {
+                document.getElementById('task-title').value = '';
+                fetchTasks();
+            }
+        }
+
+        async function toggleTaskStatus(id, currentStatus) {
+            if (!supabaseClient) return;
+            const nextStatus = currentStatus === 'Completed' ? 'Pending' : 'Completed';
+            await supabaseClient.from('tasks').update({ status: nextStatus }).eq('id', id);
+            fetchTasks();
+        }
+
+        // 4. LEADS
+        async function fetchLeads() {
+            if (!supabaseClient) return;
+            const { data } = await supabaseClient.from('crm_leads').select('*').order('id', { ascending: false });
+            const tbody = document.getElementById('leadsTableBody');
+            document.getElementById('badge-leads-count').innerText = data ? data.length : 0;
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-gray-400">No leads found.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(l => `<tr class="hover:bg-gray-50"><td class="py-3 px-3 font-semibold">${l.name}</td><td class="py-3 px-3">${l.email || '-'}</td><td class="py-3 px-3">${l.phone || '-'}</td><td class="py-3 px-3">₹${l.value || 0}</td></tr>`).join('');
         }
 
         async function handleLeadSubmit(event) {
@@ -290,9 +431,10 @@
             fetchLeads();
         }
 
+        // 5. ATTENDANCE
         async function fetchAttendance() {
             if (!supabaseClient) return;
-            const { data } = await supabaseClient.from('attendance').select('*');
+            const { data } = await supabaseClient.from('attendance').select('*').order('id', { ascending: false });
             const tbody = document.getElementById('attendanceTableBody');
             if (!data || data.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-400">No attendance records.</td></tr>`;
@@ -307,7 +449,7 @@
             fetchAttendance();
         }
 
-        // Initial Load
+        // INITIAL LOAD
         fetchCandidates();
     </script>
 </body>
